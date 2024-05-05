@@ -1,1 +1,1 @@
-# oleosim
+Process simulator for oleochemical applications
