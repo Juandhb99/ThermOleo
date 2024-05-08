@@ -1,5 +1,6 @@
 alcohol_code = {
-    
+        
+    0: 'Glycerol', 
     1: 'Methanol',
     2: 'Ethanol',
     3: 'Propanol'
@@ -83,32 +84,36 @@ references = {
     '20a': ['Liquid–liquid equilibria for ternary systems containing ethylic palm oil biodiesel + ethanol + glycerol/water: Experimental data at 298.15 and 323.15 K and thermodynamic modeling. Enio G. de Azevedo Rocha a,Luis A. Follegatti-Romero a, Sérgio Duvoisin Jr. b, Martín Aznar',
             'Palm Oil'],
    
-   '21a': ['Liquid–liquid equilibrium in the systems FAMEs+vegetable oil+methyl alcohol and FAMEs+glycerol+methyl alcohol',
+    '21a': ['Liquid–liquid equilibrium in the systems FAMEs+vegetable oil+methyl alcohol and FAMEs+glycerol+methyl alcohol',
            'Rapeseed Oil'],
    
-   '22a': ['Liquid–liquid equilibrium data and thermodynamic modeling for systems related to the production of ethyl esters of fatty acids from soybean soapstock acid oil',
+    '22a': ['Liquid–liquid equilibrium data and thermodynamic modeling for systems related to the production of ethyl esters of fatty acids from soybean soapstock acid oil',
            'Soybean Oil'],
    
-   '23a': ['Liquid–liquid equilibrium data and thermodynamic modeling, at T/K = 298.2, in the washing step of ethyl biodiesel production from crambe, fodder radish and macauba pulp oils',
+    '23a': ['Liquid–liquid equilibrium data and thermodynamic modeling, at T/K = 298.2, in the washing step of ethyl biodiesel production from crambe, fodder radish and macauba pulp oils',
            'Crambe Oil'],     
     
-   '23b': ['Liquid–liquid equilibrium data and thermodynamic modeling, at T/K = 298.2, in the washing step of ethyl biodiesel production from crambe, fodder radish and macauba pulp oils',
+    '23b': ['Liquid–liquid equilibrium data and thermodynamic modeling, at T/K = 298.2, in the washing step of ethyl biodiesel production from crambe, fodder radish and macauba pulp oils',
            'Fodder Radish Oil'],     
 
-   '23b': ['Liquid–liquid equilibrium data and thermodynamic modeling, at T/K = 298.2, in the washing step of ethyl biodiesel production from crambe, fodder radish and macauba pulp oils',
+    '23b': ['Liquid–liquid equilibrium data and thermodynamic modeling, at T/K = 298.2, in the washing step of ethyl biodiesel production from crambe, fodder radish and macauba pulp oils',
            'Macauba Oil'],
    
-   '24a': ['No reference',
-           'No reference'],      
+    '24a': ['Liquid-liquid phase equilibrium in ternary mixture of waste fish oil biodiesel-methanol-glycerol: Experimental data and thermodynamic modeling M. Maghami, J. Yousefi Seyf, S.M. Sadrameli*, A. Haghtalab',
+           'Waste Fish Oil'],      
 
-   '25a': ['No reference',
-           'No reference'],
+    '25a': ['Liquid–liquid equilibrium data for systems containing Brazil nut biodiesel + methanol + glycerin at 303.15 K and 323.15 K',
+           'Brazil nut Oil'],
+    
+    '26a': ['Novel Approach for Liquid−Liquid Phase Equilibrium of Biodiesel (Canola and Sunflower) + Glycerol + Methanol',
+            'Canola Oil'],
+    
+    '26b': ['Novel Approach for Liquid−Liquid Phase Equilibrium of Biodiesel (Canola and Sunflower) + Glycerol + Methanol',
+            'Sunflower Oil'],
+
+    '27a': ['Thermophysical properties of biodiesel and related systems: (Liquid + liquid) equilibrium data for castor oil biodiesel Marcio A. Mazutti a , Fernando A.P. Voll b , Lúcio Cardozo-Filho b , Marcos L. Corazza c , Marcelo Lanza d , Wagner L. Priamo e, J. Vladimir Oliveira d,f,⇑',
+            'Castor Oil']
 }
 
-# Ya se revisaron los archivos pero hay unos artículos que no se encuentran en la base de datos.
-# Revisar los siguientes articulos referenciados en el artículo del 2016
-# Revisar datos articulo referencia 23 
-# Revisar datos articulo referencia 24
-# Revisar datos articulo referencia 14
-# Revisar datos artículo referencia 41
+
 # Revisar datos articulo referencia 42 
