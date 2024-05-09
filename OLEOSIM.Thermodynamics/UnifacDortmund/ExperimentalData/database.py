@@ -112,8 +112,57 @@ references = {
             'Sunflower Oil'],
 
     '27a': ['Thermophysical properties of biodiesel and related systems: (Liquid + liquid) equilibrium data for castor oil biodiesel Marcio A. Mazutti a , Fernando A.P. Voll b , Lúcio Cardozo-Filho b , Marcos L. Corazza c , Marcelo Lanza d , Wagner L. Priamo e, J. Vladimir Oliveira d,f,⇑',
-            'Castor Oil']
+            'Castor Oil'],
+    
+    '28a': ['Liquid−Liquid Equilibrium for Compounds of Soybean Ethyl Biodiesel Production by Transesterification',
+            'Soybean Oil'],
+    
+    '29a': ['Prediction of Liquid-Liquid Equilibrium for Systems of Vegetable Oils, Fatty Acids, and Ethanol Eduardo Batista, Sandra Monnerat, Luiz Stragevitch, Carla G. Pina, Cintia B. Goncü alves, and Antonio J. A. Meirelles*',
+            'Triolein'],
+    
+    '29b': ['Prediction of Liquid-Liquid Equilibrium for Systems of Vegetable Oils, Fatty Acids, and Ethanol Eduardo Batista, Sandra Monnerat, Luiz Stragevitch, Carla G. Pina, Cintia B. Goncü alves, and Antonio J. A. Meirelles*',
+            'Corn Oil'],    
+    
+    '30a': ['Equilibrium data for systems composed by cottonseed oil + commercial linoleic acid + ethanol +water + tocopherols at 298.2K Christianne E.C. Rodrigues a,?, ´ Erika C.D. Reipert b, Ana Fl´avia de Souza b, Pedro A. Pessˆoa Filho c, Antonio J.A. Meirelles b',
+            'Refined cottonseed Oil'],
+     
+    '30b': ['Equilibrium data for systems composed by cottonseed oil + commercial linoleic acid + ethanol +water + tocopherols at 298.2K Christianne E.C. Rodrigues a,?, ´ Erika C.D. Reipert b, Ana Fl´avia de Souza b, Pedro A. Pessˆoa Filho c, Antonio J.A. Meirelles b',
+            'Refined cottonseed Oil'],
+    
+    '31a': ['Equilibrium Data for the System Rice Bran Oil + Fatty Acids + Ethanol + Water at 298.2 K Christianne E. C. Rodrigues, Rosemar Antoniassi, and Antonio J. A. Meirelles*',
+            'Rice Bran Oil'],
+    
+    '32a': ['Liquid–liquid equilibria for systems composed of rice bran oil and alcohol-rich solvents: Application to extraction and deacidification of oil Cássia M. Oliveira, Bruna R. Garavazo, Christianne E.C. Rodrigues',
+            'Rice Bran Oil'],
+    
+    '33a': ['Liquid-Liquid Equilibrium Data for the System Corn Oil + Oleic Acid + Ethanol + Water at 298.15 K Cintia B. Goncü alves, Eduardo Batista, and Antonio J. A. Meirelles',
+            'Corn Oil'],
+    
+    '34a': ['Liquid–liquid equilibrium data for the system palm oil + fatty acids + ethanol + water at 318.2K Cintia B. Gonçalves, Antonio J.A. Meirelles',
+            'Palm Oil and Palmitic acid'],
+    
+    '34b': ['Liquid–liquid equilibrium data for the system palm oil + fatty acids + ethanol + water at 318.2K Cintia B. Gonçalves, Antonio J.A. Meirelles',
+            'Palm Oil and Oleic acid'],
+    
+    '35a': ['Liquid-Liquid Equilibrium for Systems of Canola Oil, Oleic Acid, and Short-Chain Alcohols Eduardo Batista, Sandra Monnerat, Keˆnia Kato, Luiz Stragevitch, and Antonio J. A. Meirelles*',
+            'Canola Oil'],
+    
+    '36a': ['Liquid–liquid equilibrium of fatty systems: A new approach for adjusting UNIFAC interaction parameters Gláucia F. Hirataa, Charlles R.A. Abreub, Larissa C.B.A. Bessaa, Marcela C. Ferreiraa, Eduardo A.C. Batista a, Antonio J.A. Meirellesa,?',
+            'Mixed Oil'],
+    
+    '37a': ['Phase Equilibrium for Systems Composed by High Unsaturated Vegetable Oils + Linoleic Acid + Ethanol + Water at 298.2 K Christianne E. C. Rodrigues,† Anderson Filipini,‡ and Antonio J. A. Meirelles*,‡',
+            'Garlic Oil'],
+    
+    '37b': ['Phase Equilibrium for Systems Composed by High Unsaturated Vegetable Oils + Linoleic Acid + Ethanol + Water at 298.2 K Christianne E. C. Rodrigues,† Anderson Filipini,‡ and Antonio J. A. Meirelles*,‡',
+            'Grape seed Oil'],
+    
+    '37c': ['Phase Equilibrium for Systems Composed by High Unsaturated Vegetable Oils + Linoleic Acid + Ethanol + Water at 298.2 K Christianne E. C. Rodrigues,† Anderson Filipini,‡ and Antonio J. A. Meirelles*,‡',
+            'Sesame Oil'],
+    
+    '38a': ['Phase equilibrium for systems composed by refined soybean oil + commercial linoleic acid + ethanol +water, at 323.2K Christianne E.C. Rodrigues a,?, Elaine C.D. Peixoto b, Antonio J.A. Meirelles b',
+            'Refined soybean Oil']
+    
 }
 
 
-# Revisar datos articulo referencia 42 
+# Quede en la linea 3604 
