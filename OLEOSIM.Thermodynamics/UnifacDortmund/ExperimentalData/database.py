@@ -160,9 +160,39 @@ references = {
             'Sesame Oil'],
     
     '38a': ['Phase equilibrium for systems composed by refined soybean oil + commercial linoleic acid + ethanol +water, at 323.2K Christianne E.C. Rodrigues a,?, Elaine C.D. Peixoto b, Antonio J.A. Meirelles b',
-            'Refined soybean Oil']
+            'Refined soybean Oil'],
     
+    '39a': ['Extraction of Free Fatty Acids from Peanut Oil and Avocado Seed Oil: Liquid-Liquid Equilibrium Data at 298.2 K Christianne E. C. Rodrigues*,† and Antonio J. A. Meirelles‡', 
+            'Peanut Oil'],
+    
+    '39b': ['Extraction of Free Fatty Acids from Peanut Oil and Avocado Seed Oil: Liquid-Liquid Equilibrium Data at 298.2 K Christianne E. C. Rodrigues*,† and Antonio J. A. Meirelles‡', 
+            'Avocado Seed Oil'],
+    
+    '40a': ['De-acidification of sunflower oil by solvent extraction: (Liquid + liquid) equilibrium data at T = (303.15 and 313.15) KM. Mohsen-Nia *, A. Khodayari',
+            'Sunflower Oil'],
+    
+    '41a': ['Measuring and Modeling Liquid–Liquid Equilibria for a Soybean Oil, Oleic Acid, Ethanol, and Water System Mohsen Mohsen-Nia Æ Hamid Modarress Æ Hamid Reza Nabavi',
+            'Soybean Oil'],
+    
+    '42a': ['Deacidification of Brazil Nut and Macadamia Nut Oils by Solvent Extraction: Liquid-Liquid Equilibrium Data at 298.2 K Christianne E. C. Rodrigues, Fla´ vio A. Silva, Antonio Marsaioli, Jr., and Antonio J. A. Meirelles*',
+            'Brazil Nut Oil'],
+    
+    '42b': ['Deacidification of Brazil Nut and Macadamia Nut Oils by Solvent Extraction: Liquid-Liquid Equilibrium Data at 298.2 K Christianne E. C. Rodrigues, Fla´ vio A. Silva, Antonio Marsaioli, Jr., and Antonio J. A. Meirelles*',
+            'Macadamia Oil'],
+    
+    '43a': ['Liquid-Liquid Equilibrium for Systems of (Corn Oil + Oleic Acid + Methanol or Ethanol) at (303.15 and 313.15) K Mohsen Mohsen-Nia* and Mahdi. Dargahi',
+            'Corn Oil'],
+    
+    '44a': ['Liquid-Liquid Equilibrium for Systems Composed of Grape Seed Oil + Oleic Acid + Ethanol + Water at (283.2, 290.7, and 298.2) K Guilherme Sanaiotti, Jane Se´lia R. Coimbra,* Jose´ Carlos Gomes, and Luis Antoˆnio Minim',
+            'Grape seed Oil'],
+    
+    '45a': ['Measuring and Modeling Liquid–Liquid Equilibria for a Soybean Oil, Oleic Acid, Ethanol, and Water System Mohsen Mohsen-Nia Æ Hamid Modarress ÆHamid Reza Nabavi', 
+            'Soybean Oil'],
+    
+    '46a': ['Phase equilibria study of systems composed of refined babassu oil, lauric acid, ethanol, and water at 303.2 K',
+            'Babassu Oil']    
 }
 
+len(list(references.keys()))
 
 # Quede en la linea 3604 
