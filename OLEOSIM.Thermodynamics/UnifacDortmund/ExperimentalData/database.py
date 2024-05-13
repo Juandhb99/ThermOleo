@@ -1,9 +1,11 @@
 alcohol_code = {
         
-    0: 'Glycerol', 
+    0: 'No alcohol', 
     1: 'Methanol',
     2: 'Ethanol',
-    3: 'Propanol'
+    3: 'Propanol',
+    4: 'Glycerol'
+
 }
 
 
@@ -87,7 +89,7 @@ references = {
     '21a': ['Liquid–liquid equilibrium in the systems FAMEs+vegetable oil+methyl alcohol and FAMEs+glycerol+methyl alcohol',
            'Rapeseed Oil'],
    
-    '22a': ['Liquid–liquid equilibrium data and thermodynamic modeling for systems related to the production of ethyl esters of fatty acids from soybean soapstock acid oil',
+    '22a': ['Liquid–liquid equilibrium data and thermodynamic modeling for systems related to the production of ethyl esters of fatty acids from soybean soapstock acid oil J.D.S. Serres, D. Soares, M.L. Corazza, N. Krieger, D.A. Mitchell',
            'Soybean Oil'],
    
     '23a': ['Liquid–liquid equilibrium data and thermodynamic modeling, at T/K = 298.2, in the washing step of ethyl biodiesel production from crambe, fodder radish and macauba pulp oils',
@@ -102,7 +104,7 @@ references = {
     '24a': ['Liquid-liquid phase equilibrium in ternary mixture of waste fish oil biodiesel-methanol-glycerol: Experimental data and thermodynamic modeling M. Maghami, J. Yousefi Seyf, S.M. Sadrameli*, A. Haghtalab',
            'Waste Fish Oil'],      
 
-    '25a': ['Liquid–liquid equilibrium data for systems containing Brazil nut biodiesel + methanol + glycerin at 303.15 K and 323.15 K',
+    '25a': ['Liquid–liquid equilibrium data for systems containing Brazil nut biodiesel + methanol + glycerin at 303.15 K and 323.15 K J.D. Gonçalves, M. Aznar, G.R. Santos',
            'Brazil nut Oil'],
     
     '26a': ['Novel Approach for Liquid−Liquid Phase Equilibrium of Biodiesel (Canola and Sunflower) + Glycerol + Methanol',
@@ -114,7 +116,7 @@ references = {
     '27a': ['Thermophysical properties of biodiesel and related systems: (Liquid + liquid) equilibrium data for castor oil biodiesel Marcio A. Mazutti a , Fernando A.P. Voll b , Lúcio Cardozo-Filho b , Marcos L. Corazza c , Marcelo Lanza d , Wagner L. Priamo e, J. Vladimir Oliveira d,f,⇑',
             'Castor Oil'],
     
-    '28a': ['Liquid−Liquid Equilibrium for Compounds of Soybean Ethyl Biodiesel Production by Transesterification',
+    '28a': ['Liquid−Liquid Equilibrium for Compounds of Soybean Ethyl Biodiesel Production by Transesterification B.B. França, H.G.D.A. Villardi, F.L.P. Pessoa, A.M.C. Uller',
             'Soybean Oil'],
     
     '29a': ['Prediction of Liquid-Liquid Equilibrium for Systems of Vegetable Oils, Fatty Acids, and Ethanol Eduardo Batista, Sandra Monnerat, Luiz Stragevitch, Carla G. Pina, Cintia B. Goncü alves, and Antonio J. A. Meirelles*',
@@ -124,7 +126,7 @@ references = {
             'Corn Oil'],    
     
     '30a': ['Equilibrium data for systems composed by cottonseed oil + commercial linoleic acid + ethanol +water + tocopherols at 298.2K Christianne E.C. Rodrigues a,?, ´ Erika C.D. Reipert b, Ana Fl´avia de Souza b, Pedro A. Pessˆoa Filho c, Antonio J.A. Meirelles b',
-            'Refined cottonseed Oil'],
+            'Pretreated cottonseed Oil'],
      
     '30b': ['Equilibrium data for systems composed by cottonseed oil + commercial linoleic acid + ethanol +water + tocopherols at 298.2K Christianne E.C. Rodrigues a,?, ´ Erika C.D. Reipert b, Ana Fl´avia de Souza b, Pedro A. Pessˆoa Filho c, Antonio J.A. Meirelles b',
             'Refined cottonseed Oil'],
@@ -184,15 +186,45 @@ references = {
             'Corn Oil'],
     
     '44a': ['Liquid-Liquid Equilibrium for Systems Composed of Grape Seed Oil + Oleic Acid + Ethanol + Water at (283.2, 290.7, and 298.2) K Guilherme Sanaiotti, Jane Se´lia R. Coimbra,* Jose´ Carlos Gomes, and Luis Antoˆnio Minim',
-            'Grape seed Oil'],
+            'Crude grape seed Oil'],
+    
+    '44a': ['Liquid-Liquid Equilibrium for Systems Composed of Grape Seed Oil + Oleic Acid + Ethanol + Water at (283.2, 290.7, and 298.2) K Guilherme Sanaiotti, Jane Se´lia R. Coimbra,* Jose´ Carlos Gomes, and Luis Antoˆnio Minim',
+            'Refined grape seed Oil'],
     
     '45a': ['Measuring and Modeling Liquid–Liquid Equilibria for a Soybean Oil, Oleic Acid, Ethanol, and Water System Mohsen Mohsen-Nia Æ Hamid Modarress ÆHamid Reza Nabavi', 
             'Soybean Oil'],
     
     '46a': ['Phase equilibria study of systems composed of refined babassu oil, lauric acid, ethanol, and water at 303.2 K',
-            'Babassu Oil']    
+            'Babassu Oil'],
+    
+    '47a': ['liquid–liquid equilibrium of binary and ternary systems composed by palm oil or palm oil fractions with methanol/ethanol and water',
+             'Refined palm oil'],
+    
+    '47b': ['liquid–liquid equilibrium of binary and ternary systems composed by palm oil or palm oil fractions with methanol/ethanol and water',
+             'Refined palm olein'],
+    
+    '47c': ['liquid–liquid equilibrium of binary and ternary systems composed by palm oil or palm oil fractions with methanol/ethanol and water',
+             'Refined palm stearin'],
+    
+    '48a': ['Liquid−Liquid Equilibrium in Ternary Systems Present in Biodiesel Purification from Soybean Oil and Castor Oil at (298.2 and 333.2) K',
+            'Soybean Oil'],
+    
+    '48b': ['Liquid−Liquid Equilibrium in Ternary Systems Present in Biodiesel Purification from Soybean Oil and Castor Oil at (298.2 and 333.2) K',
+            'Castor Oil'],
+    
+    '49a': ['Liquid-liquid equilibrium data and thermodynamic modeling of systems involved in the biodiesel production in terms of acylglycerols, free fatty acids, ethyl esters, and ethanol at 303.2 and 318.2 K and local pressure Simone Shiozawa a , Daniel Gonçalves a , Marcela C. Ferreira b , Antonio J.A. Meirelles a j, Eduardo A.C. Batista a, *',
+            'Soybean Oil - ethyl linoleate - linoleic acid'],
+
+    '49b': ['Liquid-liquid equilibrium data and thermodynamic modeling of systems involved in the biodiesel production in terms of acylglycerols, free fatty acids, ethyl esters, and ethanol at 303.2 and 318.2 K and local pressure Simone Shiozawa a , Daniel Gonçalves a , Marcela C. Ferreira b , Antonio J.A. Meirelles a j, Eduardo A.C. Batista a, *',
+            'Cottonseed Oil - ethyl linoleate - linoleic acid'],
+    
+    '49c': ['Liquid-liquid equilibrium data and thermodynamic modeling of systems involved in the biodiesel production in terms of acylglycerols, free fatty acids, ethyl esters, and ethanol at 303.2 and 318.2 K and local pressure Simone Shiozawa a , Daniel Gonçalves a , Marcela C. Ferreira b , Antonio J.A. Meirelles a j, Eduardo A.C. Batista a, *',
+            'Rice bran Oil - ethyl oleate - oleic acid'],
 }
 
 len(list(references.keys()))
 
-# Quede en la linea 3604 
+
+# Hay 1277 lineas de atadura en la base de datos original, 879 en la tabla 1, 398 en la tabla 2.
+
+# 1271 lineas de atadura en la base de datos re ordenada
