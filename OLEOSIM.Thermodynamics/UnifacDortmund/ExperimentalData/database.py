@@ -220,6 +220,30 @@ references = {
     
     '49c': ['Liquid-liquid equilibrium data and thermodynamic modeling of systems involved in the biodiesel production in terms of acylglycerols, free fatty acids, ethyl esters, and ethanol at 303.2 and 318.2 K and local pressure Simone Shiozawa a , Daniel Gonçalves a , Marcela C. Ferreira b , Antonio J.A. Meirelles a j, Eduardo A.C. Batista a, *',
             'Rice bran Oil - ethyl oleate - oleic acid'],
+    
+    '50a': ['Performance of different UNIFAC parameter sets in describing experimental liquid–liquid equilibrium data of biodiesel systems',
+            'Olive Oil'],
+    
+    '50b': ['Performance of different UNIFAC parameter sets in describing experimental liquid–liquid equilibrium data of biodiesel systems',
+            'Sunflower Oil'],  
+    
+    '50c': ['Performance of different UNIFAC parameter sets in describing experimental liquid–liquid equilibrium data of biodiesel systems',
+            'Coconut Oil'],  
+    
+    '51a': ['Liquid−Liquid Equilibrium Measurement and Thermodynamic Modeling of the {Sterculia striata Biodiesel + Glycerol + Ethanol} System',
+            'Chicha Oil'],
+    
+    '51a': ['Liquid−Liquid Equilibrium Measurement and Thermodynamic Modeling of the {Sterculia striata Biodiesel + Glycerol + Ethanol} System',
+            'Chicha Oil'],
+    
+    '52a': ['Liquid–liquid equilibria of systems containing linseed oil biodiesel + methanol + glycerol: Experimental data and thermodynamic modeling',
+            'Linseed Oil'], 
+    
+    '53a': ['Liquid−Liquid Equilibrium of the System {Peanut Biodiesel + Glycerol + Ethanol} at Atmospheric Pressure',
+            'Peanut Oil'], 
+     
+    '54a': ['Experimental Data and Phase Equilibrium Modeling in Ternary and Pseudoquaternary Systems of Sunflower Oil for Biodiesel Production',
+            'Sunflower Oil']
 }
 
 len(list(references.keys()))
