@@ -243,7 +243,25 @@ references = {
             'Peanut Oil'], 
      
     '54a': ['Experimental Data and Phase Equilibrium Modeling in Ternary and Pseudoquaternary Systems of Sunflower Oil for Biodiesel Production',
-            'Sunflower Oil']
+            'Refined  Sunflower Oil'],
+    
+    '55a': ['Liquid−Liquid Equilibrium Data for Systems Involving Triacylglycerols from (Soybean, Cottonseed, or Rice Bran) Oil + Partial Acylglycerols + Anhydrous Ethanol at T = 303.2 and 318.2 K',
+            'Refined Soybean Oil'],
+    
+    '55b': ['Liquid−Liquid Equilibrium Data for Systems Involving Triacylglycerols from (Soybean, Cottonseed, or Rice Bran) Oil + Partial Acylglycerols + Anhydrous Ethanol at T = 303.2 and 318.2 K',
+            'Refined Cottonseed Oil'],
+    
+    '55c': ['Liquid−Liquid Equilibrium Data for Systems Involving Triacylglycerols from (Soybean, Cottonseed, or Rice Bran) Oil + Partial Acylglycerols + Anhydrous Ethanol at T = 303.2 and 318.2 K',
+            'Refined Rice Bran Oil'],
+    
+    '56a': ['DETERMINATION AND MODELLING OF LIQUID-LIQUID PHASE EQUILIBRIUM FOR TERNARY SYSTEMS IN BIODIESEL PRODUCTION FROM VEGETABLE OIL AND ANIMAL FAT MIXTURES',
+            'Sunflower Oil'],
+    
+    '56b': ['DETERMINATION AND MODELLING OF LIQUID-LIQUID PHASE EQUILIBRIUM FOR TERNARY SYSTEMS IN BIODIESEL PRODUCTION FROM VEGETABLE OIL AND ANIMAL FAT MIXTURES',
+            '10% Beef Tallow - Sunflower Oil'],
+    
+    '56c': ['DETERMINATION AND MODELLING OF LIQUID-LIQUID PHASE EQUILIBRIUM FOR TERNARY SYSTEMS IN BIODIESEL PRODUCTION FROM VEGETABLE OIL AND ANIMAL FAT MIXTURES',
+            '20% Beef Tallow - Sunflower Oil'],     
 }
 
 len(list(references.keys()))
