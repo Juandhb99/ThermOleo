@@ -262,6 +262,9 @@ references = {
     
     '56c': ['DETERMINATION AND MODELLING OF LIQUID-LIQUID PHASE EQUILIBRIUM FOR TERNARY SYSTEMS IN BIODIESEL PRODUCTION FROM VEGETABLE OIL AND ANIMAL FAT MIXTURES',
             '20% Beef Tallow - Sunflower Oil'],     
+    
+    '57a': ['Oil extraction from semi-defatted babassu bagasse with ethanol: Liquid-liquid equilibrium and solid-liquid extraction in a single stage ',
+            'Babassu Oil'],
 }
 
 len(list(references.keys()))
