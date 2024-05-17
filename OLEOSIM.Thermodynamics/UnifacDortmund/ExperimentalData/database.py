@@ -273,3 +273,5 @@ len(list(references.keys()))
 # Hay 1277 lineas de atadura en la base de datos original, 879 en la tabla 1, 398 en la tabla 2.
 
 # 1271 lineas de atadura en la base de datos re ordenada
+
+#Revisar referencia 50 perfil de DAG y MAG
