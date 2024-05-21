@@ -4,20 +4,29 @@ from dataclasses import dataclass, field
 @dataclass
 class ExperimentalValidation:
     
-    """The ExperimentalValidation class is a data processing pipeline which is responsible for doing 
-       the experimental validation of the mass balances for LLE ternary equilibriums using the PHI phase distribution coefficient. To do this the component must respect the following restrictions
+    """
+       Data processing pipeline which is responsible for doing the experimental validation of the tie lines in the experimental LLE ternary equilibriums using the phi (mass phase fraction of the light phase) and mass balance restrictions. 
        
-       The sum of all component mass fractions in the light phase = 1
+       The phi distribution coefficient is calculated with the following formulas:
+ 
+       phi = (wi_overall - wi_heavy)/(wi_light - wi_heavy) (i is the subscript of each component in th mixture)
        
-       The sum of all component mass fractions in the heavy phase = 1
+       Once the  is calculated it must satisfy the following mass balance restriction:
        
-       The experimental phase distribution known as phi 
+       1. 0 < phi < 1
        
-    
-    
+       2. phi_1 = phi_2 = phi_3 = phi_i
+       
+       If the phi doesn't satisfy both  restrictions the respective tie line is discarded.
+       
+       Attributes:
 
-    Returns:
-        _type_: _description_
+            path_to_data (str): Directory path to experimental data. The class at the moment only reads excel files. The data must be organized such that the overall compositions are followed by the light phase compositions and then the heavy phase compositions.
+            component_list (list[str]): List with the name of the components in the data
+            column_list_to_remove (list[str]): List of columns to remove. For processing the data all the columns that don't contain experimental data must remove and their names must be in this list.
+            
+            num_components (int) = None: Number of components according to the list of components attribute
+            phi_names (list[str]) = None: List of names for the PHI mass phase fraction columns to generate
     """    
   
     path_to_data: str  
@@ -28,8 +37,13 @@ class ExperimentalValidation:
     phi_names: list[str] = field(default=None) 
     
 
-    def _preprocess_data(self):
-        
+    def _preprocess_data(self) -> pl.DataFrame:
+        """Load the dataframe from the path given, and remove possible calculations indeterminations by changing the 0 fraction of the light phase compositions to 1e-20
+        also instanciate the num_components and phi_names attributes. 
+
+        Returns:
+            pl.DataFrame: Loaded dataa in a dataframe with the adjusments to avoid indeterminations.
+        """        
         raw_data = (pl.read_excel(self.path_to_data, engine='calamine')
                              .drop(self.column_list_to_remove)).with_row_index()
 
@@ -43,14 +57,21 @@ class ExperimentalValidation:
             .then(1e-20)
             .otherwise(pl.nth(i))
             .alias(raw_data.columns[i])
-            for i in range(self.num_components+1, self.num_components*2+1)]
+            for i in range(self.num_components+1, self.num_components*2+1)]   # The parameters in the range function consider the columns with compositions of the light phase  
             
         )
         
         return raw_data
     
-    def _calculate_experimental_phi(self, raw_data): 
-              
+    def _calculate_experimental_phi(self, raw_data: pl.DataFrame) -> pl.DataFrame: 
+        """Calculates the experimental phi value according to the mass balance formula for each component in the data
+
+        Args:
+            raw_data (pl.DataFrame): data adjusted to avoid indeterminations
+
+        Returns:
+            pl.DataFrame: Experimentally calculated phi
+        """              
         experimental_phi = raw_data.select(
             
             [((pl.nth(i) - pl.nth(i+self.num_components*2))/(pl.nth(i+self.num_components) - pl.nth(i+self.num_components*2)))
@@ -61,7 +82,14 @@ class ExperimentalValidation:
         return experimental_phi
     
     def _validate_experimental_phi(self, struct: dict) -> int:    
-        
+        """Check that the experimental phi satisfy the mass balance restrictions. If one phi for a tie line doesn't satisfies both restrictions it will return a 0, otherwise if its satisfies both restrictions will return a 1.
+
+        Args:
+            struct (dict): Columns where the experimental phi are saved
+
+        Returns:
+            int: Either 0 if the tie line doesn't satisfies both restrictions or 1 if it does.
+        """            
         filtered_data = {key:value for key, value in struct.items() if value != 0.0} 
      
         if any(value <= 0.001 or value >= 0.995 for value in filtered_data.values()):
@@ -74,28 +102,31 @@ class ExperimentalValidation:
             
         return 1
     
-    def validate_data(self):
+    def validate_data(self) -> pl.DataFrame:
+        """Run all the preprocessing and output a combined dataframe with the experimental data, experimental phi and where only the validated tie lines remain. 
+        The validation of the tie lines is done via a row wise application of the _validate_experimental_phi() function, where the pl.struct is used for better performance.
+
+        Returns:
+            pl.DataFrame: Join dataframe with the experimental data, the experimental phi and the indication of validated data 
+        """        
         
-       raw_data = self._preprocess_data() 
-       experimental_phi = self._calculate_experimental_phi(raw_data)  
-       experimental_phi = experimental_phi.with_columns(
-                       pl.struct(self.phi_names)
-                       .map_elements(self._validate_experimental_phi)
-                       .alias('Validated')
-        )
-      
-       validated_data = raw_data.join(experimental_phi, on='index') 
-       return validated_data
+        raw_data = self._preprocess_data() 
+        experimental_phi = self._calculate_experimental_phi(raw_data=raw_data)  
+        experimental_phi = experimental_phi.with_columns(
+                        pl.struct(self.phi_names)
+                        .map_elements(self._validate_experimental_phi, return_dtype=int)
+                        .alias('Validated')
+                     
+            ).filter(pl.col('Validated')==1)
+       
+        
+        validated_data = raw_data.join(experimental_phi, on='index') 
+        
+        return validated_data
         
         
             
         
 
-validated_data = ExperimentalValidation('raw_lle_data.xlsx', 
-                                        ['FAME/FAEE', 'GLYCEROL', 'ALCOHOL', 'OIL', 'DAG', 'MAG', 'ACID', 'WATER'], 
-                                        ['Ref', 'Sub Ref', 'Temperature (K)', 'Type Alcohol',  'Tie lines']).validate_data()
-
-validated_data
-validated_data.filter(pl.col('Validated')==1)
 
 
