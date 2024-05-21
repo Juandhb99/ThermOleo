@@ -274,4 +274,4 @@ len(list(references.keys()))
 
 # 1271 lineas de atadura en la base de datos re ordenada
 
-#Revisar referencia 50 perfil de DAG y MAG
+# Para la referencia 50 para el DAG se usa el perfil del aceite de girasol pero para el MAG si se usa el perfil dado en el paper.
