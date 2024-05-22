@@ -275,3 +275,5 @@ len(list(references.keys()))
 # 1271 lineas de atadura en la base de datos re ordenada
 
 # Para la referencia 50 para el DAG se usa el perfil del aceite de girasol pero para el MAG si se usa el perfil dado en el paper.
+
+# Para hacer la reconcilicación se varia el fi y la fracción de la base pesada y se utilizan como valores iniciales los experimentales del fi y la fracción pesada.
