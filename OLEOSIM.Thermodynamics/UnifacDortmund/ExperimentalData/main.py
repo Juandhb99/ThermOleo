@@ -1,5 +1,6 @@
 from experimental_data_preprocessing import ExperimentalValidation
 from pprint import pprint
+import time
 def main():
     validated_data = ExperimentalValidation(path_to_data='data/raw_lle_data.xlsx', 
                                         component_list=['FAME/FAEE', 'GLYCEROL', 'ALCOHOL', 'OIL', 'DAG', 'MAG', 'ACID', 'WATER'], 
