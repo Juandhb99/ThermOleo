@@ -44,8 +44,9 @@ class ExperimentalValidation:
         Returns:
             pl.DataFrame: Loaded dataa in a dataframe with the adjusments to avoid indeterminations.
         """        
-        raw_data = (pl.read_excel(self.path_to_data, engine='calamine')
-                             .drop(self.column_list_to_remove)).with_row_index()
+        raw_data = (pl.read_excel(self.path_to_data, engine='calamine')).with_row_index()
+        additional_columns = raw_data.select(self.column_list_to_remove).with_row_index() 
+        raw_data = raw_data.drop(self.column_list_to_remove)
 
         
         self.num_components = len(self.component_list) 
@@ -61,7 +62,7 @@ class ExperimentalValidation:
             
         )
         
-        return raw_data
+        return raw_data, additional_columns
     
     def _calculate_experimental_phi(self, raw_data: pl.DataFrame) -> pl.DataFrame: 
         """Calculates the experimental phi value according to the mass balance formula for each component in the data
@@ -98,7 +99,7 @@ class ExperimentalValidation:
         
         average_phi = sum(filtered_data.values())/len(filtered_data)
         
-        if any(abs(value - average_phi) >= 0.10 for value in filtered_data.values()):
+        if any(abs(value - average_phi)/average_phi >= 0.20 for value in filtered_data.values()):
             return 0
             
         return 1
@@ -111,7 +112,7 @@ class ExperimentalValidation:
             pl.DataFrame: Join dataframe with the experimental data, the experimental phi and the indication of validated data 
         """        
         
-        raw_data = self._preprocess_data() 
+        raw_data, additional_columns = self._preprocess_data() 
         experimental_phi = self._calculate_experimental_phi(raw_data=raw_data)  
         experimental_phi = experimental_phi.with_columns(
                         pl.struct(self.phi_names)
@@ -122,7 +123,8 @@ class ExperimentalValidation:
        
         
         validated_data = raw_data.join(experimental_phi, on='index') 
-        
+        validated_data = additional_columns.join(validated_data, on='index')
+         
         return validated_data
         
         
