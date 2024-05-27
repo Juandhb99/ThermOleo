@@ -124,6 +124,7 @@ class ExperimentalValidation:
         
         validated_data = raw_data.join(experimental_phi, on='index') 
         validated_data = additional_columns.join(validated_data, on='index')
+        validated_data = validated_data.drop('Validated')
          
         return validated_data
         
