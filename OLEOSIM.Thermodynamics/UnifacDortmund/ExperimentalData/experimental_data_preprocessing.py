@@ -1,5 +1,8 @@
 import polars as pl
+import numpy as np
 from dataclasses import dataclass, field
+
+
 
 @dataclass
 class ExperimentalValidation:
@@ -99,7 +102,7 @@ class ExperimentalValidation:
         
         average_phi = sum(filtered_data.values())/len(filtered_data)
         
-        if any(abs(value - average_phi)/average_phi >= 0.20 for value in filtered_data.values()):
+        if any(abs(value - average_phi)/average_phi >= 0.20 or np.isnan(average_phi) for value in filtered_data.values()):
             return 0
             
         return 1

@@ -57,10 +57,40 @@ for _, data in grouped:
         
         light_phase_composition_reconcile = ((const[:, 0:end_idx] - x[:, 0:end_idx]*(1-x[:,-1].reshape(rows, 1)))/x[:,-1].reshape(rows,1))
         return np.sum((const[:, end_idx*2:end_idx*3] - x[:, 0:end_idx])**2 + (const[:, end_idx:end_idx*2]- light_phase_composition_reconcile)**2)
+    
+    def light_phase_composition_constraints(x, const, rows, columns, end_idx):
+        x = x.reshape(rows, columns)
+        light_phase_composition_reconcile = ((const[:, 0:end_idx] - x[:, 0:end_idx] * (1 - x[:, -1].reshape(rows, 1))) / x[:, -1].reshape(rows, 1))
 
-    #arreglar indicies para que tenga en cuenta los compressed.
+        # Constraint: light_phase_composition_reconcile > 1e-8
+        lower_bound_constraint = light_phase_composition_reconcile - 1e-5  # light_phase_composition_reconcile > 1e-8
+        
+        return lower_bound_constraint.flatten()
 
-    res = minimize(reconciliation, initial_guess_compressed, method='nelder-mead', args = (constants, rows, columns, end_idx))
+       #arreglar indicies para que tenga en cuenta los compressed.
+
+
+    def x_constraints(x):
+        # Constraint: 0 < x < 1
+        lower_bound_x_constraint = x - 1e-5  # x > 1e-8
+        upper_bound_x_constraint = 1 - x - 1e-5  # x < 1 - 1e-8
+
+        return np.concatenate((lower_bound_x_constraint, upper_bound_x_constraint))
+
+
+    constraints = [
+        {
+            'type': 'ineq', 
+            'fun': light_phase_composition_constraints, 
+            'args': (constants, rows, columns, end_idx)
+        },
+        {
+            'type': 'ineq',
+            'fun': x_constraints
+        }
+    ]
+    
+    res = minimize(reconciliation, initial_guess_compressed, method='SLSQP', args = (constants, rows, columns, end_idx), constraints=constraints)
 
     results = res.x
     initial_guess[initial_guess_idx[0], initial_guess_idx[1]] = results
@@ -72,5 +102,8 @@ for _, data in grouped:
     final_reconcile_data.append(final_df)
 
 
-final_total_data = pl.concat(final_reconcile_data)
-final_total_data
+final_total_data = pl.concat(final_reconcile_data).drop('index')
+final_total_data.write_excel('data/refined_lle_data.xlsx')
+
+
+# Revisar resultados negativos al final de los cálculos
