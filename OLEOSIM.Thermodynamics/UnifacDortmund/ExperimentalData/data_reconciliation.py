@@ -87,7 +87,9 @@ class MassBalanceReconciliation:
         return np.concatenate((lower_bound_min_variables_constraint, upper_bound_min_variables_constraint))
     
     def reconciliation(self) -> None:
-        """The reconciliation process is done by grouping the experimental data per batches of experiments in order to process matrices with the same dimensions.
+        """The reconciliation process is done by grouping the experimental data per batches of experiments in order to process them as matrices with the same dimensions.
+           If the database contains experiments from different sources that have different components, for each batch the components that are not present will be masked to not affect the calculations.
+           After processing, all the batches are concatenated, and transformed to a polars dataframe with the same columns as the original one, finally the data is saved in an excel file to the data folder as refined_lle_data.xslx
         """        
 
         reconcile_groups = []
