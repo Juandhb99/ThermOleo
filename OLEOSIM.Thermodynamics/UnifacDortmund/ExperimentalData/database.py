@@ -272,8 +272,7 @@ len(list(references.keys()))
 
 # Hay 1277 lineas de atadura en la base de datos original, 879 en la tabla 1, 398 en la tabla 2.
 
-# 1271 lineas de atadura en la base de datos re ordenada
+# 1264 lineas de atadura en la base de datos re ordenada
+# Yo adicioné 204 lineas de atadura nuevas.
 
 # Para la referencia 50 para el DAG se usa el perfil del aceite de girasol pero para el MAG si se usa el perfil dado en el paper.
-
-# Para hacer la reconcilicación se varia el fi y la fracción de la base pesada y se utilizan como valores iniciales los experimentales del fi y la fracción pesada.
