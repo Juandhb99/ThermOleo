@@ -109,6 +109,18 @@ class ExperimentalValidation:
             
         return 1
     
+    def calculate_phi(self) -> pl.DataFrame:
+        """Calculate the experimental phi and return the raw data dataframe with the experimental phi calculated, it only returns the dataframe with these new columns
+           with no additional processing done to the data.
+
+        Returns:
+            pl.DataFrame: Raw_data with added columns that have the calculated experimental phi.
+        """        
+        raw_data, additional_columns = self._preprocess_data() 
+        experimental_phi = self._calculate_experimental_phi(raw_data=raw_data) 
+        phi_data = raw_data.join(experimental_phi, on='index')  
+        return additional_columns.join(phi_data, on='index')
+    
     def validate_data(self) -> pl.DataFrame:
         """Run all the preprocessing and output a combined dataframe with the experimental data, experimental phi and where only the validated tie lines remain. 
         The validation of the tie lines is done via a row wise application of the _validate_experimental_phi() function, where the pl.struct is used for better performance.
