@@ -89,7 +89,7 @@ class ExperimentalValidation:
     
     def _validate_experimental_phi(self, struct: dict) -> int:    
         """Check that the experimental phi satisfy the mass balance restrictions. If one phi for a tie line doesn't satisfies both restrictions it will return a 0, otherwise if its satisfies both restrictions will return a 1.
-           The conditions are the following: The phi value must be between 0.001 and 0.995 to consider the tie line as suitable. The absolute difference between each phi and the average phi of the experimental tie line must not be higher than 0.1.
+           The conditions are the following: The phi value must be between 0.001 and 0.995 to consider the tie line as suitable. The absolute error between each phi and the average phi of the experimental tie line must not be higher than 0.2.
 
         Args:
             struct (dict): Columns where the experimental phi are saved
