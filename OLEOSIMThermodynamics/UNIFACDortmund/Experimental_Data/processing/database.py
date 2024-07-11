@@ -188,7 +188,7 @@ references = {
     '44a': ['Liquid-Liquid Equilibrium for Systems Composed of Grape Seed Oil + Oleic Acid + Ethanol + Water at (283.2, 290.7, and 298.2) K Guilherme Sanaiotti, Jane Se´lia R. Coimbra,* Jose´ Carlos Gomes, and Luis Antoˆnio Minim',
             'Crude grape seed Oil'],
     
-    '44a': ['Liquid-Liquid Equilibrium for Systems Composed of Grape Seed Oil + Oleic Acid + Ethanol + Water at (283.2, 290.7, and 298.2) K Guilherme Sanaiotti, Jane Se´lia R. Coimbra,* Jose´ Carlos Gomes, and Luis Antoˆnio Minim',
+    '44b': ['Liquid-Liquid Equilibrium for Systems Composed of Grape Seed Oil + Oleic Acid + Ethanol + Water at (283.2, 290.7, and 298.2) K Guilherme Sanaiotti, Jane Se´lia R. Coimbra,* Jose´ Carlos Gomes, and Luis Antoˆnio Minim',
             'Refined grape seed Oil'],
     
     '45a': ['Measuring and Modeling Liquid–Liquid Equilibria for a Soybean Oil, Oleic Acid, Ethanol, and Water System Mohsen Mohsen-Nia Æ Hamid Modarress ÆHamid Reza Nabavi', 
