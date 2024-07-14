@@ -25,6 +25,7 @@ class MassBalanceReconciliation:
     validated_data: pl.DataFrame
     reference_to_group: list[str]
     component_number: int
+    phi_names: list[str] = field(default=None)
 
 
     def _minimization(self, min_variables: np.ndarray, min_fixed: np.ndarray, n_rows: int, n_columns: int, n_components: int) -> np.ndarray:
@@ -149,7 +150,8 @@ class MassBalanceReconciliation:
             reconcile_groups.append(final_df)
         
         reconcile_database = pl.concat(reconcile_groups).drop('index')
-        reconcile_database.write_excel('data/refined_lle_data.xlsx')
+        reconcile_database = reconcile_database.drop(self.phi_names)
+        reconcile_database.write_excel('refined_lle_data.xlsx')
 
 
    

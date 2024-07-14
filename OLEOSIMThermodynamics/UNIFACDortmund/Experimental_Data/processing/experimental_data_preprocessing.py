@@ -143,7 +143,7 @@ class ExperimentalValidation:
         validated_data = additional_columns.join(validated_data, on='index')
         validated_data = validated_data.drop('Validated')
          
-        return validated_data
+        return validated_data, self.phi_names
         
         
             

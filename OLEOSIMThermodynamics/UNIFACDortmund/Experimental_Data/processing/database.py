@@ -232,10 +232,7 @@ references = {
     
     '51a': ['Liquid−Liquid Equilibrium Measurement and Thermodynamic Modeling of the {Sterculia striata Biodiesel + Glycerol + Ethanol} System',
             'Chicha Oil'],
-    
-    '51a': ['Liquid−Liquid Equilibrium Measurement and Thermodynamic Modeling of the {Sterculia striata Biodiesel + Glycerol + Ethanol} System',
-            'Chicha Oil'],
-    
+     
     '52a': ['Liquid–liquid equilibria of systems containing linseed oil biodiesel + methanol + glycerol: Experimental data and thermodynamic modeling',
             'Linseed Oil'], 
     
