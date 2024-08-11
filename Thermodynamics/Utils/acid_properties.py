@@ -1,21 +1,14 @@
-acid_properties = {
-    
-     
-    
-    
-}
-
 acid_reference = {
    
    1: "Caproic",
    2: "Caprilic",
    3: "Lauric",
    4: "Mirystic",
-   5: "Palmtic",
+   5: "Palmitic",
    6: "Palmitoleic",
    7: "Heptadecanoic",
-   8: "Cisheptadecanoic",
-   9: "Estaeric",
+   8: "Cis-9-heptadecanoic",
+   9: "Stearic",
    10: "Oleic",
    11: "Linoleic",
    12: "Linolenic",
@@ -23,21 +16,55 @@ acid_reference = {
    14: "Densipolic",
    15: "Arachidic",
    16: "Arachidonic",
-   17: "Cis-11-icosenoic",
+   17: "Gondoic",
    18: "Cis-11,14-eicosadienoic",
    19: "Behenic",
-   20: "Cis-13 docosenoic",
+   20: "Erucic",
    21: "Cis-13 cis-16 docosenoic",
    22: "Tetracosanoic",
    23: "Pentadecanoic",
-   24: "Gondic",
-   25: "Gadoliec",
-   26: "Erucic",
-   27: "Elaidic",
-   28: "9,10-methylene-hexadecanoic",
-   29: "dihydrosterculic",
-   30: "Paullinic",
-   31: "Malvalic",
-   32: "Sterculic"
+   24: "Gadoleic",
+   25: "Elaidic",
+   26: "9,10-methylene-hexadecanoic",
+   27: "dihydrosterculic",
+   28: "Paullinic",
+   29: "Malvalic",
+   30: "Sterculic"
       
+}
+
+# The properties are in the following order in each list: molecular weight, m, n, p
+acid_properties = {
+    
+    1: [116.16, 4, 0, 0],
+    2: [144.21, 5, 0, 0],
+    3: [200.31, 10, 0, 0],
+    4: [228.36, 12, 0, 0 ],
+    5: [256.4, 14, 0, 0],
+    6: [354.48, 12, 1, 0],
+    7: [270.5, 15, 0, 0],
+    8: [268.4, 13, 1, 0],
+    9: [284.48, 16, 0, 0],
+    10: [282.47, 14, 1, 0],
+    11: [280.45, 12, 2, 0],
+    12: [278.43, 10, 3, 0],
+    13: [298.46, 13, 1, 1],
+    14: [294.6, 11, 2, 1],
+    15: [312.54, 18, 0, 0],
+    16: [304.5, 10, 4, 0],
+    17: [310.51, 16, 1, 0],
+    18: [308.5, 14, 2, 0],
+    19: [340.6, 20, 0, 0],
+    20: [338.6, 18, 1, 0],
+    21: [336.6, 16, 2, 0],
+    22: [368.6, 22, 0, 0],
+    23: [242.40, 13, 0, 0],
+    24: [310.522, 16, 1, 0],
+    25: [282.46, 14, 1, 0],
+    26: [268.4, 13, 0, 0],
+    27: [296.5, 15, 0, 0],
+    28: [310.5, 16, 1, 0],
+    29: [280.4, 14, 1, 0],
+    30: [294.5, 15, 1, 0]
+        
 }
