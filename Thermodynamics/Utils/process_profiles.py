@@ -65,7 +65,6 @@ def calculate_m_coefficients(struct: dict, m_values, n_values, p_values):
    return m, n, p
 
 experiment_profiles.describe()      
-m_values
    
 experiment_profiles = experiment_profiles.with_columns(
    
@@ -74,3 +73,8 @@ experiment_profiles = experiment_profiles.with_columns(
    .alias("result")
 ).unnest("result")
 
+coefficients = experiment_profiles.select(["m", "n", "p"])
+references = FA_profiles.select(["Ref", "Sub Ref", "MAG/DAG Profile?", "Additional FAME Profile?", "Acid mix Profile?"])
+coefficients = pl.concat([references, coefficients], how="horizontal")
+
+coefficients.write_excel(r"D:\Juan\proyectos_personales\Maestría\Materias\Tesis\oleosim\Thermodynamics\UnifacDortmund\Experimental_Data\data\profile_coeffs.xlsx")
