@@ -4,10 +4,12 @@ import numpy as np
 from acid_properties import acid_reference, acid_properties
 
 
-FA_profiles = (pl.read_excel(r"C:\Juan\Maestría\Code\oleosim\Thermodynamics\UnifacDortmund\Experimental_Data\data\acid_profile.xlsx", engine="calamine"))
-acid_names = list(acid_reference.values())
+FA_profiles = (pl.read_excel(r"D:\Juan\proyectos_personales\Maestría\Materias\Tesis\oleosim\Thermodynamics\UnifacDortmund\Experimental_Data\data\acid_profile.xlsx", engine="calamine"))
+FA_profiles.describe()
+acid_names = list(acid_reference.keys())
 mol_comp_names = ["moles_" + name for name in acid_names]
 experiment_profiles = FA_profiles.select(acid_names)
+
 
 experiment_profiles = experiment_profiles.with_columns(
     
@@ -16,13 +18,16 @@ experiment_profiles = experiment_profiles.with_columns(
 
 experiment_profiles = experiment_profiles.drop(acid_names)
 experiment_profiles = experiment_profiles.with_columns(pl.sum_horizontal(pl.all()).alias("Total"))
+
 experiment_profiles = experiment_profiles.with_columns(
    
    (pl.col(mol_comp_names)/pl.col("Total"))
    
    ).with_row_index() 
 
-def extract_properties(properties):
+
+
+def extract_properties(acid_properties):
    
    PM_values = []
    m_values = []
@@ -31,7 +36,7 @@ def extract_properties(properties):
    
    for properties in acid_properties:
 
-      PM_coeff = [0]
+      PM_coeff = properties[0]
       m_coeff = properties[1] 
       n_coeff = properties[2] 
       p_coeff = properties[3] 
@@ -46,20 +51,26 @@ def extract_properties(properties):
    n_values = np.array(n_values)
    p_values = np.array(p_values)
    
-  
+   return PM_values, m_values, n_values, p_values
    
-   
-def calculate_coefficients(struct):
-   
-   values = np.array(list(struct.values()))
+PM_values, m_values, n_values, p_values = extract_properties(acid_properties.values())
 
-      
-      
-   return 0
+def calculate_m_coefficients(struct: dict, m_values, n_values, p_values):
    
-     
-test = experiment_profiles.with_columns(pl.struct(pl.all()))
+   molar_frac = np.array(list(struct.values()))
+   m =  np.dot(molar_frac, m_values)
+   n =  np.dot(molar_frac, n_values)
+   p =  np.dot(molar_frac, p_values) 
+   
+   return m, n, p
 
-test[0]
-test_np = np.array(list(acid_reference.keys()))
-test_np[0]
+experiment_profiles.describe()      
+m_values
+   
+experiment_profiles = experiment_profiles.with_columns(
+   
+   pl.struct(mol_comp_names)
+   .map_elements(lambda x:  dict(zip(("m", "n", "p"), calculate_m_coefficients(x, m_values, n_values, p_values))))
+   .alias("result")
+).unnest("result")
+
