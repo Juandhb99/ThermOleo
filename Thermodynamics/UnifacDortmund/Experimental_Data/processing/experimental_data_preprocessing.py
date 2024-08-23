@@ -47,13 +47,13 @@ class ExperimentalValidation:
         Returns:
             pl.DataFrame: Loaded dataa in a dataframe with the adjusments to avoid indeterminations.
         """        
-        raw_data = (pl.read_excel(self.path_to_data, engine='calamine')).with_row_index()
+        raw_data = (pl.read_excel(self.path_to_data, engine="calamine")).with_row_index()
         additional_columns = raw_data.select(self.column_list_to_remove).with_row_index() 
         raw_data = raw_data.drop(self.column_list_to_remove)
 
         
         self.num_components = len(self.component_list) 
-        self.phi_names = ['phi_' + name for name in self.component_list]
+        self.phi_names = ["phi_" + name for name in self.component_list]
         
         raw_data = raw_data.with_columns( 
         
@@ -79,7 +79,7 @@ class ExperimentalValidation:
         experimental_phi = raw_data.select(
             
             [((pl.nth(i) - pl.nth(i+self.num_components*2))/(pl.nth(i+self.num_components) - pl.nth(i+self.num_components*2)))
-            .alias(f'phi_{self.component_list[i-1]}') 
+            .alias(f"phi_{self.component_list[i-1]}") 
             for i in range(1, self.num_components + 1)]
         ).with_row_index()
         
@@ -116,8 +116,8 @@ class ExperimentalValidation:
         """        
         raw_data, additional_columns = self._preprocess_data() 
         experimental_phi = self._calculate_experimental_phi(raw_data=raw_data) 
-        phi_data = raw_data.join(experimental_phi, on='index')  
-        return additional_columns.join(phi_data, on='index')
+        phi_data = raw_data.join(experimental_phi, on="index")  
+        return additional_columns.join(phi_data, on="index")
     
     def validate_data(self) -> pl.DataFrame:
         """Run all the preprocessing and output a combined dataframe with the experimental data, experimental phi and where only the validated tie lines remain. 
@@ -132,14 +132,14 @@ class ExperimentalValidation:
         experimental_phi = experimental_phi.with_columns(
                         pl.struct(self.phi_names)
                         .map_elements(self._validate_experimental_phi, return_dtype=int)
-                        .alias('Validated')
+                        .alias("Validated")
                      
-            ).filter(pl.col('Validated')==1)
+            ).filter(pl.col("Validated")==1)
        
         
-        validated_data = raw_data.join(experimental_phi, on='index') 
-        validated_data = additional_columns.join(validated_data, on='index')
-        validated_data = validated_data.drop('Validated')
+        validated_data = raw_data.join(experimental_phi, on="index") 
+        validated_data = additional_columns.join(validated_data, on="index")
+        validated_data = validated_data.drop("Validated")
          
         return validated_data, self.phi_names
         

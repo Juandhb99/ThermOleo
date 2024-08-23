@@ -102,13 +102,13 @@ class MassBalanceReconciliation:
         end_idx_light_phase = start_idx_light_phase + self.component_number
         end_idx_heavy_phase = start_idx_heavy_phase + self.component_number
         end_idx_phi_exp = start_idx_phi_exp + self.component_number
-        self.reference_to_group.append('index')
+        self.reference_to_group.append("index")
        
         for _, data in grouped: 
             reference_columns = data.select(self.reference_to_group)
             experiments_df = data.drop(self.reference_to_group)
             columns_names = experiments_df.columns
-            columns_names.append('Reconcile phi')
+            columns_names.append("Reconcile phi")
             experiments_matrix = experiments_df.to_numpy()
             experiments_matrix = np.ma.array(experiments_matrix, mask=((experiments_matrix == 0.0) | (experiments_matrix == 1e-20)))
             n_rows = experiments_matrix.shape[0]
@@ -126,18 +126,18 @@ class MassBalanceReconciliation:
 
             constraints = [
                 {
-                    'type': 'ineq', 
-                    'fun': self._reconciled_light_composition_constrain, 
-                    'args': (min_fixed, n_rows, n_columns, n_components)
+                    "type": "ineq", 
+                    "fun": self._reconciled_light_composition_constrain, 
+                    "args": (min_fixed, n_rows, n_columns, n_components)
                 },
                 {
-                    'type': 'ineq',
-                    'fun': self._min_variables_constraints
+                    "type": "ineq",
+                    "fun": self._min_variables_constraints
                 }
             ]
             
             results = minimize(self._minimization, min_variables_compressed, 
-                           method='SLSQP', 
+                           method="SLSQP", 
                            args = (min_fixed, n_rows, n_columns, n_components), 
                            constraints=constraints)
 
@@ -146,12 +146,12 @@ class MassBalanceReconciliation:
             reconcile_data = np.hstack([experiments_matrix[:,0:start_idx_heavy_phase], min_variables[:,:-1], experiments_matrix[:, start_idx_phi_exp:end_idx_phi_exp], min_variables[:,-1].reshape(n_rows, 1)])
             reconcile_data[:, start_idx_light_phase:end_idx_light_phase] = (reconcile_data[:, 0:start_idx_light_phase] - reconcile_data[:, start_idx_heavy_phase:end_idx_heavy_phase]*(1-reconcile_data[:,-1].reshape(reconcile_data.shape[0],1)))/reconcile_data[:,-1].reshape(reconcile_data.shape[0],1)
             reconcile_data_df = pl.from_numpy(reconcile_data, columns_names)
-            final_df = pl.concat([reference_columns, reconcile_data_df], how = 'horizontal')
+            final_df = pl.concat([reference_columns, reconcile_data_df], how = "horizontal")
             reconcile_groups.append(final_df)
         
-        reconcile_database = pl.concat(reconcile_groups).drop('index')
+        reconcile_database = pl.concat(reconcile_groups).drop("index")
         reconcile_database = reconcile_database.drop(self.phi_names)
-        reconcile_database.write_excel('refined_lle_data.xlsx')
+        reconcile_database.write_excel("refined_lle_data.xlsx")
 
 
    
