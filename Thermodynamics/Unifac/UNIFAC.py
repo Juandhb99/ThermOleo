@@ -48,16 +48,19 @@ Wk = np.sum(v*w/(MW*zeta), axis = 1)/np.sum(v*w/(MW*zeta))
 THETA = Q*Wk/np.sum(Q*Wk)
 lngamma_r = Q*(1 - np.log(np.sum(THETA.T*tao, axis=0)) - np.sum(THETA*tao/np.sum(THETA.T*tao, axis=0), axis = 1))
 
-Wk_pure = np.nan_to_num(v/np.sum(v, axis=0), nan=0.0)
-Wk_pure
-THETA_pure = np.nan_to_num(Q.T*Wk_pure/np.sum(Q.T*Wk_pure, axis = 0), nan=0.0)
 
-np.log(np.sum(THETA_pure[:,0].T*tao, axis=0))
-np.log(np.sum(THETA_pure[:,0].reshape(1,8).T*tao, axis=0))
+with np.errstate(divide='ignore', invalid='ignore'):
+    Wk_pure = np.nan_to_num(v/np.sum(v, axis=0), nan=0.0)
+    THETA_pure = np.nan_to_num(Q.T*Wk_pure/np.sum(Q.T*Wk_pure, axis = 0), nan=0.0)
+    lngamma_r_pure = np.zeros((8,8))    
+    lngamma_r_pure = np.array([
+        np.nan_to_num(
+            Q * (1 - np.log(np.sum(THETA_pure[:, comp].reshape(1, 8).T * tao, axis=0)) - 
+                np.sum(THETA_pure[:, comp] * tao / np.sum(THETA_pure[:, comp].reshape(1, 8).T * tao, axis=0), axis=1)),
+            nan=0
+        )
+        for comp in range(THETA_pure.shape[1])
+    ]).reshape(8,8)
 
 
-lngamma_r_pure = Q*(1 - np.log(np.sum(THETA_pure[:,0].reshape(1,8).T*tao, axis=0)) - np.sum(THETA_pure[0,:]*tao/np.where(np.sum(THETA_pure[:,0].T*tao, axis=0)==0, 1e-20, np.sum(THETA_pure[:,0].T*tao, axis=0)), axis = 1)) 
 lngamma_r_pure
-
-
-
