@@ -46,7 +46,7 @@ with np.errstate(divide='ignore', invalid='ignore'):
 tao = np.exp(-GIP/T)
 Wk = np.sum(v*w/(MW*zeta), axis = 1)/np.sum(v*w/(MW*zeta))
 THETA = Q*Wk/np.sum(Q*Wk)
-lngamma_r = Q*(1 - np.log(np.sum(THETA.T*tao, axis=0)) - np.sum(THETA*tao/np.sum(THETA.T*tao, axis=0), axis = 1))
+lngamma_r_mix = Q*(1 - np.log(np.sum(THETA.T*tao, axis=0)) - np.sum(THETA*tao/np.sum(THETA.T*tao, axis=0), axis = 1))
 
 
 with np.errstate(divide='ignore', invalid='ignore'):
@@ -62,5 +62,4 @@ with np.errstate(divide='ignore', invalid='ignore'):
         for comp in range(THETA_pure.shape[1])
     ]).reshape(8,8)
 
-
-lngamma_r_pure
+lngamma_r = np.array([v[:,0]*(lngamma_r_mix - lngamma_r_pure) for comp in range(8)])
