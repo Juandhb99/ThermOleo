@@ -35,36 +35,28 @@ def unifac(w):
     R = np.array([[0.4469, 0.6744, 0.9011, 1.1167, 1.0, 1.6764, 1.3013, 0.92]], dtype = np.float64)
     Q = np.array([[0.228, 0.54, 0.8488, 0.867, 1.2, 1.42, 1.224, 1.4]], dtype = np.float64)
 
-    # Combinatorial contribution
-    r = np.sum(v*R.T, axis=0)/MW
-    q = np.sum(v*Q.T, axis=0)/MW
-    zeta = np.sum(w/MW)
-    phi = r*w/np.sum(r*w)
-    theta = q*w/np.sum(q*w)
     with np.errstate(divide='ignore', invalid='ignore'):
+        # Combinatorial contribution
+        r = np.sum(v*R.T, axis=0)/MW
+        q = np.sum(v*Q.T, axis=0)/MW
+        zeta = np.sum(w/MW)
+        phi = r*w/np.sum(r*w)
+        theta = q*w/np.sum(q*w)
         lngamma_c = np.nan_to_num(1 - zeta*MW*phi/w + np.log(zeta*MW*phi/w) - 5*q*MW*(1 - (phi/theta) - np.log(theta/phi)), nan=0.0) 
 
-    # Residual contribution
-    tao = np.exp(-GIP/T)
-    Wk = np.sum(v*w/(MW*zeta), axis = 1)/np.sum(v*w/(MW*zeta))
-    THETA = Q*Wk/np.sum(Q*Wk)
-    lngamma_r_mix = Q*(1 - np.log(np.sum(THETA.T*tao, axis=0)) - np.sum(THETA*tao/np.sum(THETA.T*tao, axis=0), axis = 1))
+        # Residual contribution
+        tao = np.exp(-GIP/T)
+        Wk = np.sum(v*w/(MW*zeta), axis = 1)/np.sum(v*w/(MW*zeta))
+        THETA = Q*Wk/np.sum(Q*Wk)
+        lngamma_r_mix = Q*(1 - np.log(np.sum(THETA.T*tao, axis=0)) - np.sum(THETA*tao/np.sum(THETA.T*tao, axis=0), axis = 1))
 
-
-    with np.errstate(divide='ignore', invalid='ignore'):
         Wk_pure = np.nan_to_num(v/np.sum(v, axis=0), nan=0.0)
         THETA_pure = np.nan_to_num(Q.T*Wk_pure/np.sum(Q.T*Wk_pure, axis = 0), nan=0.0)
         lngamma_r_pure = np.zeros((8,8))    
         lngamma_r_pure = np.array([
-            np.nan_to_num(
-                Q * (1 - np.log(np.sum(THETA_pure[:, comp].reshape(1, 8).T * tao, axis=0)) - 
-                    np.sum(THETA_pure[:, comp] * tao / np.sum(THETA_pure[:, comp].reshape(1, 8).T * tao, axis=0), axis=1)),
-                nan=0
-            )
-            for comp in range(THETA_pure.shape[1])
+            np.nan_to_num(Q * (1 - np.log(np.sum(THETA_pure[:, comp].reshape(1, 8).T * tao, axis=0)) - np.sum(THETA_pure[:, comp] * tao / np.sum(THETA_pure[:, comp].reshape(1, 8).T * tao, axis=0), axis=1)), nan=0) for comp in range(THETA_pure.shape[1])
         ]).reshape(8,8)
         
-
     lngamma_r = np.sum(np.array([v[:,comp]*(lngamma_r_mix - lngamma_r_pure[comp]) for comp in range(8)]).reshape(8,8), axis = 1)
     gamma = np.exp(lngamma_c + lngamma_r)
     
