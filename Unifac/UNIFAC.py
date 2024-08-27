@@ -30,6 +30,9 @@ class Unifac:
     _zeta: float = field(default=None)
     
     def _group_properties(self) -> None:
+        """Instantiate the volume and surface area for each of the considered groups. These parameters are obtained from: 
+            Magnussen, T., Rasmussen, P., & Fredenslund, A. (1981). UNIFAC parameter table for prediction of liquid-liquid equilibriums. Industrial & Engineering Chemistry Process Design and Development, 20(2), 331–339. https://doi.org/10.1021/i200013a024
+        """        
         
         self._R = np.array([[0.4469, 0.6744, 0.9011, 1.1167, 1.0, 1.6764, 1.3013, 0.92]], dtype = np.float64)
         self._Q = np.array([[0.228, 0.54, 0.8488, 0.867, 1.2, 1.42, 1.224, 1.4]], dtype = np.float64)
