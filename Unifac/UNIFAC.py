@@ -2,10 +2,25 @@ import numpy as np
 from dataclasses import dataclass, field
 
 # Order of molecules: FAME, GLYCEROL, ALCOHOL, OIL, DAG, MAG, ACID, H2O
-# Order of groups: CH, CH2, CH3, CH=CH, OH, CH2COO, COOH. H2O
+# Order of groups: CH, CH2, CH3, CH=CH, OH, CH2COO, COOH, H2O
 @dataclass
 class Unifac:
-    
+    """
+        UNIFAC thermodynamical model coded to predict activity coefficients for oleochemical mixtures.
+        
+        Attributes:
+            GIP (np.ndarray): Matrix of group interaction parameters, this must be a 8x8 matrix where each column and row represents a
+            functional group. The order must be CH, CH2, CH3, CH=CH, OH, CH2COO, COOH, H2O for both the columns and rows.
+            v (np.ndarray): Matrix of the number of times each group appears in each molecule of the mixture. This is a 8x8 matrix 
+            where each column represents a molecule and each row a functional group. The order of the columns must be FAME/FAEE, GLYCEROL, ALCOHOL, OIL, DAG, MAG, ACID, H2O,
+            the order of the rows must be CH, CH2, CH3, CH=CH, OH, CH2COO, COOH, H2O.
+            MW (np.ndarray): Vector of molecular weights of the molecules in the system. This is a 1x8 vector that must have the following order
+            FAME/FAEE, GLYCEROL, ALCOHOL, OIL, DAG, MAG, ACID, H2O.
+            T (float): Temperature of the system in K.
+            _R (np.ndarray): Group volume.
+            _Q (np.ndarray): Group surface area.
+            _zeta (float): Pseudo weighted average molar composition of the mixture.
+    """
     GIP: np.ndarray 
     v: np.ndarray
     MW: np.ndarray
@@ -84,12 +99,9 @@ v = np.array([
 ], dtype = np.float64)
 
 MW = np.array([310.6056, 92.09, 32.04, 878.0, 648.264, 370.138, 262.7856, 18], dtype = np.float64)
-
-
-
 w_test = np.array([[0.856, 0.028, 0.116, 0, 0, 0, 0, 0],
               [0.002265, 0.675, 0.323, 0, 0, 0, 0, 0]], dtype = np.float64)   
-gamma = Unifac(GIP, v, MW, T).calculate_gamma(w)
 
+gamma = Unifac(GIP, v, MW, T).calculate_gamma(w)
 phase_distribution = Unifac(GIP, v, MW, T)
 np.apply_along_axis(phase_distribution.calculate_gamma, 1, w_test)
