@@ -90,9 +90,9 @@ class Unifac:
         Returns:
             np.ndarray: Vector of activity coefficients per component.
         """        
-        self.group_properties()
-        lngamma_c = self.combinatorial_contribution(w)
-        lngamma_r = self.residual_contribution(w) 
+        self._group_properties()
+        lngamma_c = self._combinatorial_contribution(w)
+        lngamma_r = self._residual_contribution(w) 
         gamma = np.exp(lngamma_c + lngamma_r)
         
         return gamma
