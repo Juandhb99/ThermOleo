@@ -66,7 +66,7 @@ class UnifacDortmund:
             np.ndarray: Vector of combinatorial contributions per component.
         """        
         with np.errstate(divide='ignore', invalid='ignore'):
-            tao = np.exp(-self.GIP/self.T)
+            tao = np.exp(-(self.GIP[:, :, 0] + self.GIP[:, :, 1]*self.T + self.GIP[:, :, 2]*self.T**2)/self.T)
             Wk = np.sum(self.v*w/(self.MW*self._zeta), axis = 1)/np.sum(self.v*w/(self.MW*self._zeta))
             THETA = self._Q*Wk/np.sum(self._Q*Wk)
             lngamma_r_mix = self._Q*(1 - np.log(np.sum(THETA.T*tao, axis=0)) - np.sum(THETA*tao/np.sum(THETA.T*tao, axis=0), axis = 1))
