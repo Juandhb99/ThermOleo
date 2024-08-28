@@ -9,8 +9,9 @@ class UnifacDortmund:
         UNIFAC Dortmund thermodynamical model coded to predict activity coefficients for oleochemical mixtures.
         
         Attributes:
-            GIP (np.ndarray): Matrix of group interaction parameters, this must be a 8x8 matrix where each column and row represents a
-            functional group. The order must be CH, CH2, CH3, CH=CH, OH, CH2COO, COOH, H2O for both the columns and rows.
+            GIP (np.ndarray): Matrix of group interaction parameters, this must be a 8x8x3 matrix where each column and row represents a
+            functional group. The order must be CH, CH2, CH3, CH=CH, OH, CH2COO, COOH, H2O for both the columns and rows. The a, b and c GIP for the 
+            unifac dortmund model are respectively must be the first, second and third layer of the GIP matrix. 
             v (np.ndarray): Matrix of the number of times each group appears in each molecule of the mixture. This is a 8x8 matrix 
             where each column represents a molecule and each row a functional group. The order of the columns must be FAME/FAEE, GLYCEROL, ALCOHOL, OIL, DAG, MAG, ACID, H2O,
             the order of the rows must be CH, CH2, CH3, CH=CH, OH, CH2COO, COOH, H2O.
