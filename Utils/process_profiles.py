@@ -134,7 +134,7 @@ class AcidProfileCoeff:
          .alias("result")
       ).unnest("result")
       
-      coefficients = experiment_profiles.select(["m", "n", "p"])
+      coefficients = experiment_profiles.select(["m", "n", "p"]) 
       coefficients = pl.concat([self.references, coefficients], how="horizontal")
       coefficients.write_excel(self.save_path + "\profile_coeffs.xlsx")            
 
@@ -143,3 +143,13 @@ profile_coeffs = AcidProfileCoeff(r"D:\Juan\proyectos_personales\Maestría\Mater
                                   r"D:\Juan\proyectos_personales\Maestría\Materias\Tesis\oleosim\Thermodynamics\UnifacDortmund\Experimental_Data\data")
 
 profile_coeffs.calculate_profile_coeffs()
+
+
+coefficients = (pl.read_excel(r"D:\Juan\proyectos_personales\Maestría\Materias\Tesis\oleosim\UnifacDortmund\Experimental_Data\data\profile_coeffs.xlsx", engine="calamine"))
+
+coefficients = coefficients.with_columns(
+   
+   (15 + 14*pl.col("m") + 26*pl.col("n") + 30*pl.col("p") + 58 + 15).alias("MW_FAME/FAEE")
+)
+
+coefficients
