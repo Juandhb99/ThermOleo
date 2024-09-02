@@ -149,8 +149,9 @@ profile_coeffs.calculate_profile_coeffs()
 class CalculateMW:
    
    path: str 
+   save_path: str
 
-   def calculate_MW(self):   
+   def calculate_MW(self) -> None:   
       
       coeff_data = (pl.read_excel(self.path, engine="calamine"))
       coeff_data = coeff_data.with_columns(
@@ -161,7 +162,14 @@ class CalculateMW:
          (15*2 + 14*(2*pl.col("m")+2) + 26*2*pl.col("n") + 13*(2*pl.col("p")+1) + 17*2*pl.col("p") + 58*2).alias("MW_DAG"),
          (15 + 14*(pl.col("m")+2) + 26*pl.col("n") + 13*(pl.col("p")+1) + 17*pl.col("p") + 58).alias("MW_MAG"),
          (15 + 14*pl.col("m") + 26*pl.col("n") + 30*pl.col("p") + 45).alias("MW_FA"),
-         pl.lit(18).alias("H2O") 
+         pl.lit(18).alias("MW_H2O") 
       )
+      
+      comp_MW = coeff_data.drop(["m", "n", "p", "b"])      
+      comp_MW.write_excel(self.save_path + "\comps_MW.xlsx")
+      
 
-      return coeff_data
+comps_mw = CalculateMW(r"C:\Juan\Maestría\Code\oleosim\UnifacDortmund\Experimental_Data\data\profile_coeffs.xlsx", 
+                       r"C:\Juan\Maestría\Code\oleosim\UnifacDortmund\Experimental_Data\data")
+
+comps_mw.calculate_MW()
