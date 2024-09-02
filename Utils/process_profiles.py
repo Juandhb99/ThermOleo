@@ -9,7 +9,8 @@ class AcidProfileCoeff:
       Acid profile calculation process, it takes the acid_properties database, with the information about the number of CH2 (m), C=C (n) and OH (p) groups
       in each of the fatty acids, and creates a new excel file with the coefficients for each of the experimental profiles found in the database.py file 
       in the Experimental_Data folder of UNIFAC Dortmund. This class calculates the coefficients of the characteristic molecule for use in the LLE modelling.
-   
+      To execute this process it is needed to create the object and run the calculate_profile_coeffs methods. 
+      
       Attributes:
          path_to_data (str): Path to the experimental data of the fatty acid profiles.
          save_path (str): Path to save the new excel file with the calculated coefficients. 
@@ -138,21 +139,25 @@ class AcidProfileCoeff:
       coefficients = pl.concat([self.references, coefficients], how="horizontal")
       coefficients.write_excel(self.save_path + "\profile_coeffs.xlsx")            
 
-
-profile_coeffs = AcidProfileCoeff(r"D:\Juan\proyectos_personales\Maestría\Materias\Tesis\oleosim\Thermodynamics\UnifacDortmund\Experimental_Data\data\acid_profile.xlsx",
-                                  r"D:\Juan\proyectos_personales\Maestría\Materias\Tesis\oleosim\Thermodynamics\UnifacDortmund\Experimental_Data\data")
-
-profile_coeffs.calculate_profile_coeffs()
-
-
 @dataclass
 class CalculateMW:
-   
+   """
+      Calculate the molecular weights of the 8 components considered in the equilibrium. For the Oil, DAG, MAG, FA and FAME/FAEE, the 
+      molecular weight is calculated using the pseudo molecule and the m, n, p and b parameters. The b parameters where manually defined in the 
+      database by correlating the reference to the experimental tie line database. To use this class, create the object and run the calculate_MW method
+      after calculating the MW, the additional columns are removed manually after associating for each reference the correct compositions, when different,
+      FA profiles are used.
+      
+      Attributes:
+         path_to_data (str): Path to the experimental data of the fatty acid profiles.
+         save_path (str): Path to save the new excel file with the calculated coefficients.  
+   """ 
    path: str 
    save_path: str
 
    def calculate_MW(self) -> None:   
-      
+      """Calculate the MW for each component.
+      """      
       coeff_data = (pl.read_excel(self.path, engine="calamine"))
       coeff_data = coeff_data.with_columns(
          (15*2 + 14*pl.col("m") + 26*pl.col("n") + 30*pl.col("p") + 58 + 14*pl.col("b")).alias("MW_FAME/FAEE"),
