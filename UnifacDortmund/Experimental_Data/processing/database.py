@@ -126,10 +126,10 @@ references = {
             'Corn Oil'],    
     
     '30a': ['Equilibrium data for systems composed by cottonseed oil + commercial linoleic acid + ethanol +water + tocopherols at 298.2K Christianne E.C. Rodrigues a,?, ´ Erika C.D. Reipert b, Ana Fl´avia de Souza b, Pedro A. Pessˆoa Filho c, Antonio J.A. Meirelles b',
-            'Pretreated cottonseed Oil'],
+            'Refined cottonseed Oil'],
      
     '30b': ['Equilibrium data for systems composed by cottonseed oil + commercial linoleic acid + ethanol +water + tocopherols at 298.2K Christianne E.C. Rodrigues a,?, ´ Erika C.D. Reipert b, Ana Fl´avia de Souza b, Pedro A. Pessˆoa Filho c, Antonio J.A. Meirelles b',
-            'Refined cottonseed Oil'],
+            'Pretreated cottonseed Oil'],
     
     '31a': ['Equilibrium Data for the System Rice Bran Oil + Fatty Acids + Ethanol + Water at 298.2 K Christianne E. C. Rodrigues, Rosemar Antoniassi, and Antonio J. A. Meirelles*',
             'Rice Bran Oil'],

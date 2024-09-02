@@ -149,7 +149,10 @@ coefficients = (pl.read_excel(r"D:\Juan\proyectos_personales\Maestría\Materias\
 
 coefficients = coefficients.with_columns(
    
-   (15 + 14*pl.col("m") + 26*pl.col("n") + 30*pl.col("p") + 58 + 15).alias("MW_FAME/FAEE")
+   (15 + 14*pl.col("m") + 26*pl.col("n") + 30*pl.col("p") + 58 + 15).alias("MW_FAME/FAEE"),
+   MW_Glycerol = 92.09382,
+   
+   
 )
 
 coefficients
