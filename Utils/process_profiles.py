@@ -145,14 +145,23 @@ profile_coeffs = AcidProfileCoeff(r"D:\Juan\proyectos_personales\Maestría\Mater
 profile_coeffs.calculate_profile_coeffs()
 
 
-coefficients = (pl.read_excel(r"D:\Juan\proyectos_personales\Maestría\Materias\Tesis\oleosim\UnifacDortmund\Experimental_Data\data\profile_coeffs.xlsx", engine="calamine"))
+@dataclass
+class CalculateMW:
+   
+   path: str 
 
-coefficients = coefficients.with_columns(
-   
-   (15 + 14*pl.col("m") + 26*pl.col("n") + 30*pl.col("p") + 58 + 15).alias("MW_FAME/FAEE"),
-   MW_Glycerol = 92.09382,
-   
-   
-)
+   def calculate_MW(self):   
+      
+      coeff_data = (pl.read_excel(self.path, engine="calamine"))
+      coeff_data = coeff_data.with_columns(
+         (15*2 + 14*pl.col("m") + 26*pl.col("n") + 30*pl.col("p") + 58 + 14*pl.col("b")).alias("MW_FAME/FAEE"),
+         pl.lit(92.09).alias("MW_Glycerol"),
+         pl.when(pl.col("b") == 0).then(32.04).when(pl.col("b") == 1).then(46.07).when(pl.col("b") == 2).then(60.09).otherwise(None).alias("MW_Alcohol"),
+         (15*3 + 14*(3*pl.col("m")+2) + 26*3*pl.col("n") + 13*(3*pl.col("p")+1) + 17*3*pl.col("p") + 58*3).alias("MW_Oil"),
+         (15*2 + 14*(2*pl.col("m")+2) + 26*2*pl.col("n") + 13*(2*pl.col("p")+1) + 17*2*pl.col("p") + 58*2).alias("MW_DAG"),
+         (15 + 14*(pl.col("m")+2) + 26*pl.col("n") + 13*(pl.col("p")+1) + 17*pl.col("p") + 58).alias("MW_MAG"),
+         (15 + 14*pl.col("m") + 26*pl.col("n") + 30*pl.col("p") + 45).alias("MW_FA"),
+         pl.lit(18).alias("H2O") 
+      )
 
-coefficients
+      return coeff_data
