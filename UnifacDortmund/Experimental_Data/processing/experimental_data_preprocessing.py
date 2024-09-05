@@ -68,7 +68,7 @@ class ExperimentalValidation:
         return raw_data, additional_columns
     
     def _calculate_experimental_phi(self, raw_data: pl.DataFrame) -> pl.DataFrame: 
-        """Calculates the experimental phi value according to the mass balance formula for each component in the data
+        """Calculates the experimental phi value for the light phase according to the mass balance formula for each component in the data
 
         Args:
             raw_data (pl.DataFrame): data adjusted to avoid indeterminations
