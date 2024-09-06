@@ -1,5 +1,6 @@
 import polars as pl
 import numpy as np
+from scipy.optimize import minimize, newton
 from UnifacDortmund import UnifacDortmund
 
 
@@ -25,9 +26,8 @@ result = comps_MW.filter(
 result
 i = 0
 for name, data in group_tie_lines:
+    i += 1
     print(name)
-    print(data.drop(["Ref", "Sub Ref"]))
-    i=+1
     print(i)
     
 GIP_unifac = np.array([
@@ -45,10 +45,12 @@ GIP_dortmund = np.zeros((8, 8, 3), dtype = np.float64)
 GIP_dortmund[:, :, 0] = GIP_unifac   
 
 test_tie_lines = tie_lines.filter(
-    (pl.col("Ref") == 19) & (pl.col("Sub Ref") == "a")
+    (pl.col("Ref") == 19) & (pl.col("Sub Ref") == "a") & (pl.col("Temperature (K)") == 293.15)
 )
 
-test_tie_lines_np = test_tie_lines.drop(["Ref", "Sub Ref"]).to_numpy()
+test_tie_lines
+
+test_tie_lines_np = test_tie_lines.drop(["Ref", "Sub Ref", "Temperature (K)"]).to_numpy()
 
 test_coeffs = coeffs.filter(
     (pl.col("Ref") == 19) & (pl.col("Sub Ref") == "a")
@@ -71,11 +73,35 @@ v = np.array([
     [0,                     0,    0,                   0,                       0,                       0,                     0,                  1.0]])
 
 
-exp_phi = test_tie_lines_np[:, -1]
-feed = test_tie_lines_np[:, 0:8]
-light_phase = test_tie_lines_np[:, 8:16]
-heavy_phase = test_tie_lines_np[:, 16:24]
 
-phase_distribution = UnifacDortmund(GIP_dortmund, v, test_comps_MW, )
+test_comps_MW.reshape(8)
+test_tie_lines_np[:, 8:16]
+GIP_dortmund[:, :, 0]
 
-    
+phase_distribution = UnifacDortmund(GIP_dortmund, v, test_comps_MW.reshape(8), 293.15)
+gamma_light = np.zeros((5, 8))
+gamma_heavy = np.zeros((5, 8))
+mask_light = test_tie_lines_np[:, 8:16] == 0
+mask_heavy = test_tie_lines_np[:, 16:24] == 0
+gamma_light = np.apply_along_axis(phase_distribution.calculate_gamma, 1, test_tie_lines_np[:, 8:16]) 
+gamma_heavy = np.apply_along_axis(phase_distribution.calculate_gamma, 1, test_tie_lines_np[:, 16:24]) 
+gamma_light[mask_light] = 1
+gamma_heavy[mask_heavy] = 1
+Ki = gamma_light/gamma_heavy
+rachford_rice = np.sum(test_tie_lines_np[:, 0:8]*(Ki-1)/(1+(Ki-1)*test_tie_lines_np[:, -1].reshape(5, 1)), 1)
+rachford_rice
+
+def rachford_rice(x, Z, K): 
+    return np.sum(Z*(K-1)/(1+(K-1)*x))
+
+sol = newton(rachford_rice, x0=test_tie_lines_np[:, -1].reshape(5, 1), args = (test_tie_lines_np[:, 0:8], Ki))
+sol
+
+calculated_w_light = test_tie_lines_np[:, 0:8]/(1+(Ki-1)*sol)
+calculated_w_heavy = Ki*calculated_w_light
+
+calculated_w_light
+calculated_w_heavy
+
+
+
