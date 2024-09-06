@@ -45,7 +45,7 @@ GIP_dortmund = np.zeros((8, 8, 3), dtype = np.float64)
 GIP_dortmund[:, :, 0] = GIP_unifac   
 
 test_tie_lines = tie_lines.filter(
-    (pl.col("Ref") == 19) & (pl.col("Sub Ref") == "a") & (pl.col("Temperature (K)") == 293.15)
+    (pl.col("Ref") == 1) & (pl.col("Sub Ref") == "a") & (pl.col("Temperature (K)") == 298.15)
 )
 
 test_tie_lines
@@ -87,19 +87,24 @@ gamma_light = np.apply_along_axis(phase_distribution.calculate_gamma, 1, test_ti
 gamma_heavy = np.apply_along_axis(phase_distribution.calculate_gamma, 1, test_tie_lines_np[:, 16:24]) 
 gamma_light[mask_light] = 1
 gamma_heavy[mask_heavy] = 1
+
+gamma_light
+gamma_heavy
 Ki = gamma_light/gamma_heavy
-rachford_rice = np.sum(test_tie_lines_np[:, 0:8]*(Ki-1)/(1+(Ki-1)*test_tie_lines_np[:, -1].reshape(5, 1)), 1)
-rachford_rice
+rachford_rice = np.sum(test_tie_lines_np[:, 0:8]*(Ki-1)/(1+(Ki-1)*test_tie_lines_np[:, -1].reshape(3, 1)), 1)
 
 def rachford_rice(x, Z, K): 
     return np.sum(Z*(K-1)/(1+(K-1)*x))
 
-sol = newton(rachford_rice, x0=test_tie_lines_np[:, -1].reshape(5, 1), args = (test_tie_lines_np[:, 0:8], Ki))
+def rachford_rice_d1(x, Z, K): 
+    return np.sum(-Z*(K-1)**2/(1+(K-1)*x)**2)
+
+sol = newton(rachford_rice, fprime=rachford_rice_d1, x0=(1-test_tie_lines_np[:, -1].reshape(3, 1)), args = (test_tie_lines_np[:, 0:8], Ki))
+
 sol
 
 calculated_w_light = test_tie_lines_np[:, 0:8]/(1+(Ki-1)*sol)
 calculated_w_heavy = Ki*calculated_w_light
-
 calculated_w_light
 calculated_w_heavy
 
