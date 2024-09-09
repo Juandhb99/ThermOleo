@@ -1,6 +1,7 @@
+import warnings
 import polars as pl
 import numpy as np
-from scipy.optimize import minimize, newton
+from scipy.optimize import newton, least_squares
 from UnifacDortmund import UnifacDortmund
 
 
@@ -17,19 +18,14 @@ tie_lines = tie_lines.with_columns(
 tie_lines = tie_lines.drop(["Type Alcohol"])
 coeffs = coeffs.drop(["MAG/DAG Profile?", "Additional FAME Profile?", "Acid mix Profile?", "Type Alcohol"])
 comps_MW = comps_MW.drop(["Type Alcohol"])
-group_tie_lines = tie_lines.group_by(["Ref", "Sub Ref", "Temperature (K)"])
+group_tie_lines = tie_lines.group_by(["Ref", "Sub Ref", "Temperature (K)"], maintain_order=True)
 
-result = comps_MW.filter(
-    (pl.col("Ref") == 19) & (pl.col("Sub Ref") == "a")
-)
+def rachford_rice(x, Z, K): 
+    return np.sum(Z*(K-1)/(1+(K-1)*x))
 
-result
-i = 0
-for name, data in group_tie_lines:
-    i += 1
-    print(name)
-    print(i)
-    
+def rachford_rice_d1(x, Z, K): 
+    return np.sum(-Z*(K-1)**2/(1+(K-1)*x)**2)
+
 GIP_unifac = np.array([
        [0,          0,          0,     -3214.25, -1718.09, -3079.37, 1295.55,  1249.74], 
        [0,          0,          0,     -3214.25, -1718.09, -3079.37, 1295.55,  1249.74],
@@ -42,71 +38,54 @@ GIP_unifac = np.array([
        ], dtype = np.float64)
 
 GIP_dortmund = np.zeros((8, 8, 3), dtype = np.float64)
-GIP_dortmund[:, :, 0] = GIP_unifac   
+GIP_dortmund[:, :, 0] = GIP_unifac
 
-test_tie_lines = tie_lines.filter(
-    (pl.col("Ref") == 1) & (pl.col("Sub Ref") == "a") & (pl.col("Temperature (K)") == 298.15)
-)
+all_w_light = []
+all_w_heavy = []
 
-test_tie_lines
+i = 0
+for name, data in group_tie_lines:
+    i += 1    
+    number_tie_lines = data.shape[0]
+    tie_lines_np = data.drop(["Ref", "Sub Ref", "Temperature (K)"]).to_numpy()
 
-test_tie_lines_np = test_tie_lines.drop(["Ref", "Sub Ref", "Temperature (K)"]).to_numpy()
+    experiment_coeffs = coeffs.filter((pl.col("Ref") == name[0]) & (pl.col("Sub Ref") == name[1])).drop(["Ref", "Sub Ref"]).to_numpy()
 
-test_coeffs = coeffs.filter(
-    (pl.col("Ref") == 19) & (pl.col("Sub Ref") == "a")
-).drop(["Ref", "Sub Ref"]).to_numpy()
+    experiment_MW = comps_MW.filter((pl.col("Ref") == name[0]) & (pl.col("Sub Ref") == name[1])).drop(["Ref", "Sub Ref"]).to_numpy()
+    
+    v = np.array([
+        [experiment_coeffs[0][2],     1.0,  0,                   3*experiment_coeffs[0][2] + 1, 2*experiment_coeffs[0][2] + 1, experiment_coeffs[0][2] + 1, experiment_coeffs[0][2],  0],
+        [experiment_coeffs[0][0],     2.0,  experiment_coeffs[0][3],   3*experiment_coeffs[0][0] + 2, 2*experiment_coeffs[0][0] + 2, experiment_coeffs[0][0] + 2, experiment_coeffs[0][0] , 0],
+        [2.0,                   0,    1.0,                 3.0,                     2.0,                     1.0,                   1.0,                0],
+        [experiment_coeffs[0][1],     0,    0,                   3*experiment_coeffs[0][1],     2*experiment_coeffs[0][1],     experiment_coeffs[0][1],     experiment_coeffs[0][1],  0],
+        [experiment_coeffs[0][2],     3.0,  1.0,                 3*experiment_coeffs[0][2],     2*experiment_coeffs[0][2],     experiment_coeffs[0][2],     experiment_coeffs[0][2],  0],
+        [1.0,                   0,    0,                   3.0,                     2.0,                     1.0,                   0,                  0],
+        [0,                     0,    0,                   0,                       0,                       0,                     1.0,                0],
+        [0,                     0,    0,                   0,                       0,                       0,                     0,                  1.0]])
 
-test_comps_MW = comps_MW.filter(
-    (pl.col("Ref") == 19) & (pl.col("Sub Ref") == "a")
-).drop(["Ref", "Sub Ref"]).to_numpy()
+    experiment_MW.reshape(8)
+    
+    phase_distribution = UnifacDortmund(GIP_dortmund, v, experiment_MW.reshape(8), name[2])
+    gamma_light = np.zeros((number_tie_lines, 8))
+    gamma_heavy = np.zeros((number_tie_lines, 8))
+    mask_light = tie_lines_np[:, 8:16] == 0
+    mask_heavy = tie_lines_np[:, 16:24] == 0
+    gamma_light = np.apply_along_axis(phase_distribution.calculate_gamma, 1, tie_lines_np[:, 8:16]) 
+    gamma_heavy = np.apply_along_axis(phase_distribution.calculate_gamma, 1, tie_lines_np[:, 16:24]) 
+    gamma_light[mask_light] = 1
+    gamma_heavy[mask_heavy] = 1 
+    gamma_heavy = np.where(gamma_heavy == 0, 1e-20, gamma_heavy) 
+    Ki = gamma_light/gamma_heavy 
+    
+    heavy_overall_mass_fraction = (1-tie_lines_np[:, -1].reshape(number_tie_lines, 1))
+    sol = newton(rachford_rice, fprime=rachford_rice_d1, x0=heavy_overall_mass_fraction, args = (tie_lines_np[:, 0:8], Ki))
+    calculated_w_light = tie_lines_np[:, 0:8]/(1+(Ki-1)*sol)
+    calculated_w_heavy = Ki*calculated_w_light
 
-test_tie_lines_np
+    all_w_light.append(calculated_w_light)
+    all_w_heavy.append(calculated_w_heavy)
 
-v = np.array([
-    [test_coeffs[0][2],     1.0,  0,                   3*test_coeffs[0][2] + 1, 2*test_coeffs[0][2] + 1, test_coeffs[0][2] + 1, test_coeffs[0][2],  0],
-    [test_coeffs[0][0],     2.0,  test_coeffs[0][3],   3*test_coeffs[0][0] + 2, 2*test_coeffs[0][0] + 2, test_coeffs[0][0] + 2, test_coeffs[0][0] , 0],
-    [2.0,                   0,    1.0,                 3.0,                     2.0,                     1.0,                   1.0,                0],
-    [test_coeffs[0][1],     0,    0,                   3*test_coeffs[0][1],     2*test_coeffs[0][1],     test_coeffs[0][1],     test_coeffs[0][1],  0],
-    [test_coeffs[0][2],     3.0,  1.0,                 3*test_coeffs[0][2],     2*test_coeffs[0][2],     test_coeffs[0][2],     test_coeffs[0][2],  0],
-    [1.0,                   0,    0,                   3.0,                     2.0,                     1.0,                   0,                  0],
-    [0,                     0,    0,                   0,                       0,                       0,                     1.0,                0],
-    [0,                     0,    0,                   0,                       0,                       0,                     0,                  1.0]])
+final_w_light = np.vstack(all_w_light)
+final_w_heavy = np.vstack(all_w_heavy)
 
-
-
-test_comps_MW.reshape(8)
-test_tie_lines_np[:, 8:16]
-GIP_dortmund[:, :, 0]
-
-phase_distribution = UnifacDortmund(GIP_dortmund, v, test_comps_MW.reshape(8), 293.15)
-gamma_light = np.zeros((5, 8))
-gamma_heavy = np.zeros((5, 8))
-mask_light = test_tie_lines_np[:, 8:16] == 0
-mask_heavy = test_tie_lines_np[:, 16:24] == 0
-gamma_light = np.apply_along_axis(phase_distribution.calculate_gamma, 1, test_tie_lines_np[:, 8:16]) 
-gamma_heavy = np.apply_along_axis(phase_distribution.calculate_gamma, 1, test_tie_lines_np[:, 16:24]) 
-gamma_light[mask_light] = 1
-gamma_heavy[mask_heavy] = 1
-
-gamma_light
-gamma_heavy
-Ki = gamma_light/gamma_heavy
-rachford_rice = np.sum(test_tie_lines_np[:, 0:8]*(Ki-1)/(1+(Ki-1)*test_tie_lines_np[:, -1].reshape(3, 1)), 1)
-
-def rachford_rice(x, Z, K): 
-    return np.sum(Z*(K-1)/(1+(K-1)*x))
-
-def rachford_rice_d1(x, Z, K): 
-    return np.sum(-Z*(K-1)**2/(1+(K-1)*x)**2)
-
-sol = newton(rachford_rice, fprime=rachford_rice_d1, x0=(1-test_tie_lines_np[:, -1].reshape(3, 1)), args = (test_tie_lines_np[:, 0:8], Ki))
-
-sol
-
-calculated_w_light = test_tie_lines_np[:, 0:8]/(1+(Ki-1)*sol)
-calculated_w_heavy = Ki*calculated_w_light
-calculated_w_light
-calculated_w_heavy
-
-
-
+tie_lines
