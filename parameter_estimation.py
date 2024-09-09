@@ -37,7 +37,7 @@ GIP_unifac = np.array([
        [20930.91, 20930.91,  20930.91,  -688.85, -14448.32, 1158.19, -1429.48,     0]
        ], dtype = np.float64)
 
-GIP_dortmund = np.zeros((8, 8, 3), dtype = np.float64)
+GIP_dortmund = np.ones((8, 8, 3), dtype = np.float64)
 GIP_dortmund[:, :, 0] = GIP_unifac
 
 all_w_light = []
@@ -88,4 +88,4 @@ for name, data in group_tie_lines:
 final_w_light = np.vstack(all_w_light)
 final_w_heavy = np.vstack(all_w_heavy)
 
-tie_lines
+mask_zeros = GIP_dortmund[:, :, 0] == 0
