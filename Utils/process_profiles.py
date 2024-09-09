@@ -178,3 +178,39 @@ comps_mw = CalculateMW(r"C:\Juan\Maestría\Code\oleosim\UnifacDortmund\Experimen
                        r"C:\Juan\Maestría\Code\oleosim\UnifacDortmund\Experimental_Data\data")
 
 comps_mw.calculate_MW()
+
+
+
+coeffs = pl.read_excel(r"D:\Juan\proyectos_personales\Maestría\Materias\Tesis\oleosim\UnifacDortmund\Experimental_Data\data\profile_coeffs.xlsx", engine="calamine")
+coeffs_groups = coeffs.group_by(["Ref","Sub Ref", "MAG/DAG Profile?", "Additional FAME Profile?", "Acid mix Profile?", "Type Alcohol"], maintain_order=True)
+
+v_total = []
+for name, data in coeffs_groups:
+   print(name)
+   data = data.drop(["Ref","Sub Ref", "MAG/DAG Profile?", "Additional FAME Profile?", "Acid mix Profile?", "Type Alcohol"]).to_numpy()
+
+   v = np.array([
+        [data[0][2],     1.0,    0,                   3*data[0][2] + 1,         2*data[0][2] + 1,     data[0][2] + 1, data[0][2],  0],
+        [data[0][0],     2.0,    data[0][3],          3*data[0][0] + 2,         2*data[0][0] + 2,     data[0][0] + 2, data[0][0] , 0],
+        [2.0,            0,      1.0,                 3.0,                      2.0,                  1.0,            1.0,         0],
+        [data[0][1],     0,      0,                   3*data[0][1],             2*data[0][1],         data[0][1],     data[0][1],  0],
+        [data[0][2],     3.0,    1.0,                 3*data[0][2],             2*data[0][2],         data[0][2],     data[0][2],  0],
+        [1.0,            0,      0,                   3.0,                      2.0,                  1.0,            0,           0],
+        [0,              0,      0,                   0,                        0,                    0,              1.0,         0],
+        [0,              0,      0,                   0,                        0,                    0,              0,         1.0]])
+
+   df = pl.DataFrame(v, schema=["FAME/FAEE", "GLYCEROL", "ALCOHOL", "OIL", "DAG", "MAG", "ACID", "H2O"])
+   df = df.with_columns(
+      pl.lit(name[0]).alias("Ref"),
+      pl.lit(name[1]).alias("Sub Ref"),
+      pl.lit(name[2]).alias("MAG/DAG Profile"),
+      pl.lit(name[3]).alias("Additional FAME Profile"),
+      pl.lit(name[4]).alias("Acid mix Profile"),
+      pl.lit(name[5]).alias("Type Alcohol"),
+   )
+   
+   v_total.append(df)
+
+v_total_df = pl.concat(v_total)
+
+v_total_df.write_excel(r"D:\Juan\proyectos_personales\Maestría\Materias\Tesis\oleosim\UnifacDortmund\Experimental_Data\data\group_contribution.xlsx")
