@@ -174,43 +174,49 @@ class CalculateMW:
       comp_MW.write_excel(self.save_path + "\comps_MW.xlsx")
       
 
-comps_mw = CalculateMW(r"C:\Juan\Maestría\Code\oleosim\UnifacDortmund\Experimental_Data\data\profile_coeffs.xlsx", 
-                       r"C:\Juan\Maestría\Code\oleosim\UnifacDortmund\Experimental_Data\data")
-
-comps_mw.calculate_MW()
-
-
-
-coeffs = pl.read_excel(r"D:\Juan\proyectos_personales\Maestría\Materias\Tesis\oleosim\UnifacDortmund\Experimental_Data\data\profile_coeffs.xlsx", engine="calamine")
-coeffs_groups = coeffs.group_by(["Ref","Sub Ref", "MAG/DAG Profile?", "Additional FAME Profile?", "Acid mix Profile?", "Type Alcohol"], maintain_order=True)
-
-v_total = []
-for name, data in coeffs_groups:
-   print(name)
-   data = data.drop(["Ref","Sub Ref", "MAG/DAG Profile?", "Additional FAME Profile?", "Acid mix Profile?", "Type Alcohol"]).to_numpy()
-
-   v = np.array([
-        [data[0][2],     1.0,    0,                   3*data[0][2] + 1,         2*data[0][2] + 1,     data[0][2] + 1, data[0][2],  0],
-        [data[0][0],     2.0,    data[0][3],          3*data[0][0] + 2,         2*data[0][0] + 2,     data[0][0] + 2, data[0][0] , 0],
-        [2.0,            0,      1.0,                 3.0,                      2.0,                  1.0,            1.0,         0],
-        [data[0][1],     0,      0,                   3*data[0][1],             2*data[0][1],         data[0][1],     data[0][1],  0],
-        [data[0][2],     3.0,    1.0,                 3*data[0][2],             2*data[0][2],         data[0][2],     data[0][2],  0],
-        [1.0,            0,      0,                   3.0,                      2.0,                  1.0,            0,           0],
-        [0,              0,      0,                   0,                        0,                    0,              1.0,         0],
-        [0,              0,      0,                   0,                        0,                    0,              0,         1.0]])
-
-   df = pl.DataFrame(v, schema=["FAME/FAEE", "GLYCEROL", "ALCOHOL", "OIL", "DAG", "MAG", "ACID", "H2O"])
-   df = df.with_columns(
-      pl.lit(name[0]).alias("Ref"),
-      pl.lit(name[1]).alias("Sub Ref"),
-      pl.lit(name[2]).alias("MAG/DAG Profile"),
-      pl.lit(name[3]).alias("Additional FAME Profile"),
-      pl.lit(name[4]).alias("Acid mix Profile"),
-      pl.lit(name[5]).alias("Type Alcohol"),
-   )
+@dataclass
+class GroupContribution:
    
-   v_total.append(df)
+   """Calculate the group contributions for each experiment using the fatty acid profile. This class generates an excel file that has the reference and sub reference 
+      of the corresponding experiment. For each experiment and 8x8 matrix will be created. The rows of the matrix correspond to the contribution of the groups CH, CH2, CH3, CH=CH, OH, CH2COO, COOH and H2O
+      in that order. The columns correspond to the components FAME/FAEE, GLYCEROL, ALCOHOL, OIL, DAG, MAG, ACID, H2O. Each row, column pair represents the contribution of the row group to the
+      column component calculated from the m, n, p and b parameters using the fatty acid profile.
+   """
+   
+   path: str
+   save_path: str
 
-v_total_df = pl.concat(v_total)
+   def calculate_group_contribution(self) -> None:
+      """Calculate the group contributions for each experiment
+      """      
+      coeffs = pl.read_excel(self.path, engine="calamine")
+      coeffs_groups = coeffs.group_by(["Ref","Sub Ref", "MAG/DAG Profile?", "Additional FAME Profile?", "Acid mix Profile?", "Type Alcohol"], maintain_order=True)
+      v_total = []
+      for name, data in coeffs_groups:
+         print(name)
+         data = data.drop(["Ref","Sub Ref", "MAG/DAG Profile?", "Additional FAME Profile?", "Acid mix Profile?", "Type Alcohol"]).to_numpy()
 
-v_total_df.write_excel(r"D:\Juan\proyectos_personales\Maestría\Materias\Tesis\oleosim\UnifacDortmund\Experimental_Data\data\group_contribution.xlsx")
+         v = np.array([
+            [data[0][2],     1.0,    0,                   3*data[0][2] + 1,         2*data[0][2] + 1,     data[0][2] + 1, data[0][2],  0],
+            [data[0][0],     2.0,    data[0][3],          3*data[0][0] + 2,         2*data[0][0] + 2,     data[0][0] + 2, data[0][0] , 0],
+            [2.0,            0,      1.0,                 3.0,                      2.0,                  1.0,            1.0,         0],
+            [data[0][1],     0,      0,                   3*data[0][1],             2*data[0][1],         data[0][1],     data[0][1],  0],
+            [data[0][2],     3.0,    1.0,                 3*data[0][2],             2*data[0][2],         data[0][2],     data[0][2],  0],
+            [1.0,            0,      0,                   3.0,                      2.0,                  1.0,            0,           0],
+            [0,              0,      0,                   0,                        0,                    0,              1.0,         0],
+            [0,              0,      0,                   0,                        0,                    0,              0,         1.0]])
+
+         df = pl.DataFrame(v, schema=["FAME/FAEE", "GLYCEROL", "ALCOHOL", "OIL", "DAG", "MAG", "ACID", "H2O"])
+         df = df.with_columns(
+            pl.lit(name[0]).alias("Ref"),
+            pl.lit(name[1]).alias("Sub Ref"),
+            pl.lit(name[2]).alias("MAG/DAG Profile"),
+            pl.lit(name[3]).alias("Additional FAME Profile"),
+            pl.lit(name[4]).alias("Acid mix Profile"),
+            pl.lit(name[5]).alias("Type Alcohol"),
+         )
+         
+         v_total.append(df)
+
+      v_total_df = pl.concat(v_total)
+      v_total_df.write_excel(self.save_path + "\group_contribution.xlsx")

@@ -1,13 +1,14 @@
-import warnings
-import polars as pl
 import numpy as np
+import polars as pl
+import seaborn as sns
+import matplotlib.pyplot as plt
 from scipy.optimize import newton, least_squares
 from UnifacDortmund import UnifacDortmund
 
 
-tie_lines = pl.read_excel(r"D:\Juan\proyectos_personales\Maestría\Materias\Tesis\oleosim\UnifacDortmund\Experimental_Data\data\refined_lle_data.xlsx", engine="calamine")
-coeffs = pl.read_excel(r"D:\Juan\proyectos_personales\Maestría\Materias\Tesis\oleosim\UnifacDortmund\Experimental_Data\data\profile_coeffs.xlsx", engine="calamine")
-comps_MW = pl.read_excel(r"D:\Juan\proyectos_personales\Maestría\Materias\Tesis\oleosim\UnifacDortmund\Experimental_Data\data\comps_MW.xlsx", engine="calamine")
+tie_lines = pl.read_excel(r"C:\Juan\Maestría\Code\oleosim\UnifacDortmund\Experimental_Data\data\refined_lle_data.xlsx", engine="calamine")
+group_contribution = pl.read_excel(r"C:\Juan\Maestría\Code\oleosim\UnifacDortmund\Experimental_Data\data\group_contribution.xlsx", engine="calamine")
+comps_MW = pl.read_excel(r"C:\Juan\Maestría\Code\oleosim\UnifacDortmund\Experimental_Data\data\comps_MW.xlsx", engine="calamine")
 
 tie_lines = tie_lines.with_columns(
     pl.col("Sub Ref").str.slice(0, 1).alias("Sub Ref")
@@ -18,10 +19,10 @@ tie_lines_validate = tie_lines.filter(~tie_lines["index"].is_in(tie_lines_train[
 tie_lines_train = tie_lines_train.drop(["index"])
 tie_lines_validate = tie_lines_validate.drop(["index"])
 
-
-coeffs = coeffs.drop(["MAG/DAG Profile?", "Additional FAME Profile?", "Acid mix Profile?", "Type Alcohol"])
+group_contribution = group_contribution.drop(["MAG/DAG Profile?", "Additional FAME Profile?", "Acid mix Profile?", "Type Alcohol"])
 comps_MW = comps_MW.drop(["Type Alcohol"])
-group_tie_lines = tie_lines_train.group_by(["Ref", "Sub Ref", "Temperature (K)"], maintain_order=True)
+tie_lines = tie_lines.drop(["index"])
+group_tie_lines = tie_lines.group_by(["Ref", "Sub Ref", "Temperature (K)"], maintain_order=True)
 
 def rachford_rice(x, Z, K): 
     return np.sum(Z*(K-1)/(1+(K-1)*x))
@@ -45,28 +46,13 @@ GIP_dortmund[:, :, 0] = GIP_unifac
 
 all_w_light = []
 all_w_heavy = []
-
-
 i = 0
 for name, data in group_tie_lines:
     i += 1    
     number_tie_lines = data.shape[0]
     tie_lines_np = data.drop(["Ref", "Sub Ref", "Temperature (K)"]).to_numpy()
-
-    experiment_coeffs = coeffs.filter((pl.col("Ref") == name[0]) & (pl.col("Sub Ref") == name[1])).drop(["Ref", "Sub Ref"]).to_numpy()
-
-    experiment_MW = comps_MW.filter((pl.col("Ref") == name[0]) & (pl.col("Sub Ref") == name[1])).drop(["Ref", "Sub Ref"]).to_numpy()
-    
-    v = np.array([
-        [experiment_coeffs[0][2],     1.0,  0,                   3*experiment_coeffs[0][2] + 1, 2*experiment_coeffs[0][2] + 1, experiment_coeffs[0][2] + 1, experiment_coeffs[0][2],  0],
-        [experiment_coeffs[0][0],     2.0,  experiment_coeffs[0][3],   3*experiment_coeffs[0][0] + 2, 2*experiment_coeffs[0][0] + 2, experiment_coeffs[0][0] + 2, experiment_coeffs[0][0] , 0],
-        [2.0,                   0,    1.0,                 3.0,                     2.0,                     1.0,                   1.0,                0],
-        [experiment_coeffs[0][1],     0,    0,                   3*experiment_coeffs[0][1],     2*experiment_coeffs[0][1],     experiment_coeffs[0][1],     experiment_coeffs[0][1],  0],
-        [experiment_coeffs[0][2],     3.0,  1.0,                 3*experiment_coeffs[0][2],     2*experiment_coeffs[0][2],     experiment_coeffs[0][2],     experiment_coeffs[0][2],  0],
-        [1.0,                   0,    0,                   3.0,                     2.0,                     1.0,                   0,                  0],
-        [0,                     0,    0,                   0,                       0,                       0,                     1.0,                0],
-        [0,                     0,    0,                   0,                       0,                       0,                     0,                  1.0]])
-
+    v = group_contribution.filter((pl.col("Ref") == name[0]) & (pl.col("Sub Ref") == name[1])).drop(["Ref", "Sub Ref"]).to_numpy()
+    experiment_MW = comps_MW.filter((pl.col("Ref") == name[0]) & (pl.col("Sub Ref") == name[1])).drop(["Ref", "Sub Ref"]).to_numpy() 
     experiment_MW.reshape(8)
     
     phase_distribution = UnifacDortmund(GIP_dortmund, v, experiment_MW.reshape(8), name[2])
@@ -85,11 +71,52 @@ for name, data in group_tie_lines:
     sol = newton(rachford_rice, fprime=rachford_rice_d1, x0=heavy_overall_mass_fraction, args = (tie_lines_np[:, 0:8], Ki))
     calculated_w_light = tie_lines_np[:, 0:8]/(1+(Ki-1)*sol)
     calculated_w_heavy = Ki*calculated_w_light
+    
+    rearranged_w_light = calculated_w_light.copy()
+    rearranged_w_heavy = calculated_w_heavy.copy()
+    
+    #for i in range(number_tie_lines):
+        #if calculated_w_light[i, 1] > calculated_w_heavy[i, 1]:
+        #rearranged_w_light[i, 1] = calculated_w_heavy[i, 1]  
+        #rearranged_w_heavy[i, 1] = calculated_w_light[i, 1] 
 
-    all_w_light.append(calculated_w_light)
-    all_w_heavy.append(calculated_w_heavy)
+        #elif calculated_w_light[i, 3] > calculated_w_heavy[i, 3]:
+           #rearranged_w_light[i, 3] = calculated_w_heavy[i, 3] 
+           #rearranged_w_heavy[i, 3] = calculated_w_light[i, 3] 
+        
+        #elif calculated_w_light[i, 7] > calculated_w_heavy[i, 7]:
+           #rearranged_w_light[i, 7] = calculated_w_heavy[i, 7] 
+           #rearranged_w_heavy[i, 7] = calculated_w_light[i, 7] 
+    
+    #all_w_light.append(rearranged_w_light)
+    #all_w_heavy.append(rearranged_w_heavy)
 
+    
+    if all(calculated_w_light[:,1] > calculated_w_heavy[:,1]):
+        rearranged_w_light = calculated_w_heavy
+        rearranged_w_heavy = calculated_w_light 
+        all_w_light.append(rearranged_w_light)
+        all_w_heavy.append(rearranged_w_heavy)
+    else:
+        all_w_light.append(calculated_w_light)
+        all_w_heavy.append(calculated_w_heavy)
+
+    #all_w_light.append(calculated_w_light)
+    #all_w_heavy.append(calculated_w_heavy)
+
+        
 final_w_light = np.vstack(all_w_light)
 final_w_heavy = np.vstack(all_w_heavy)
 
-mask_zeros = GIP_dortmund[:, :, 0] == 0
+
+results = np.hstack([final_w_light, final_w_heavy])
+tie_lines_eval = tie_lines.select(['FAME/FAEE_L', 'GLYCEROL_L', 'ALCOHOL_L', 'OIL_L', 'DAG_L', 'MAG_L', 'ACID_L', 'WATER_L', 'FAME/FAEE_H', 'GLYCEROL_H', 'ALCOHOL_H', 'OIL_H', 'DAG_H', 'MAG_H', 'ACID_H', 'WATER_H'])
+tie_lines_eval_np = tie_lines_eval.to_numpy()
+objective = np.sum((tie_lines_eval_np - results)**2, 1)/tie_lines_eval_np.shape[0]*100
+
+ref_results = pl.concat([tie_lines.select(["Ref", "Sub Ref"]), pl.DataFrame(objective, schema=["Squared Error"])], how="horizontal")
+filtered_results = ref_results.filter(pl.col("Squared Error") > 0.1)
+sns.set_theme(rc={'figure.figsize':(25,10)})
+sns.scatterplot(x = range(tie_lines_eval_np.shape[0]), y = objective)
+plt.show()
+
