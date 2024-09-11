@@ -65,6 +65,16 @@ class ExperimentalValidation:
             
         )
         
+        condition = (
+        (pl.col("OIL_L") > pl.col("OIL_H")))
+
+        # Swap values between columns ending with _L and _H
+        raw_data = raw_data.with_columns([
+            pl.when(condition).then(pl.col(f"{col}_H")).otherwise(pl.col(f"{col}_L")).alias(f"{col}_L") for col in self.component_list
+        ] + [
+            pl.when(condition).then(pl.col(f"{col}_L")).otherwise(pl.col(f"{col}_H")).alias(f"{col}_H") for col in self.component_list
+        ])
+            
         return raw_data, additional_columns
     
     def _calculate_experimental_phi(self, raw_data: pl.DataFrame) -> pl.DataFrame: 

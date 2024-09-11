@@ -13,6 +13,29 @@ comps_MW = pl.read_excel(r"C:\Juan\Maestría\Code\oleosim\UnifacDortmund\Experim
 tie_lines = tie_lines.with_columns(
     pl.col("Sub Ref").str.slice(0, 1).alias("Sub Ref")
 ).with_row_index()
+
+tie_lines.filter(pl.col("WATER_L") > pl.col("WATER_H"))
+
+tie_lines.columns
+
+# Define the column suffixes for _L and _H
+suffixes = ["FAME/FAEE", "GLYCEROL", "ALCOHOL", "OIL", "DAG", "MAG", "ACID", "WATER"]
+
+# Define conditions where OIL_L > OIL_H, GLYCEROL_L > GLYCEROL_H, and WATER_L > WATER_H
+condition = (
+    (pl.col("OIL_L") > pl.col("OIL_H")))
+
+# Swap values between columns ending with _L and _H
+tie_lines = tie_lines.with_columns([
+    pl.when(condition).then(pl.col(f"{col}_H")).otherwise(pl.col(f"{col}_L")).alias(f"{col}_L") for col in suffixes
+] + [
+    pl.when(condition).then(pl.col(f"{col}_L")).otherwise(pl.col(f"{col}_H")).alias(f"{col}_H") for col in suffixes
+])
+
+tie_lines
+
+tie_lines.filter(pl.col("Ref")==46)
+
 tie_lines = tie_lines.drop(["Type Alcohol"])
 tie_lines_train = tie_lines.sample(fraction=0.8, with_replacement=False, seed=42).sort("index")
 tie_lines_validate = tie_lines.filter(~tie_lines["index"].is_in(tie_lines_train["index"]))
@@ -46,9 +69,7 @@ GIP_dortmund[:, :, 0] = GIP_unifac
 
 all_w_light = []
 all_w_heavy = []
-i = 0
 for name, data in group_tie_lines:
-    i += 1    
     number_tie_lines = data.shape[0]
     tie_lines_np = data.drop(["Ref", "Sub Ref", "Temperature (K)"]).to_numpy()
     v = group_contribution.filter((pl.col("Ref") == name[0]) & (pl.col("Sub Ref") == name[1])).drop(["Ref", "Sub Ref"]).to_numpy()
@@ -71,6 +92,9 @@ for name, data in group_tie_lines:
     sol = newton(rachford_rice, fprime=rachford_rice_d1, x0=heavy_overall_mass_fraction, args = (tie_lines_np[:, 0:8], Ki))
     calculated_w_light = tie_lines_np[:, 0:8]/(1+(Ki-1)*sol)
     calculated_w_heavy = Ki*calculated_w_light
+    
+    calculated_w_light = np.where(calculated_w_light >= 1, 0.999, calculated_w_light)  
+    calculated_w_heavy = np.where(calculated_w_heavy >= 1, 0.999, calculated_w_heavy) 
     
     rearranged_w_light = calculated_w_light.copy()
     rearranged_w_heavy = calculated_w_heavy.copy()
@@ -113,9 +137,20 @@ results = np.hstack([final_w_light, final_w_heavy])
 tie_lines_eval = tie_lines.select(['FAME/FAEE_L', 'GLYCEROL_L', 'ALCOHOL_L', 'OIL_L', 'DAG_L', 'MAG_L', 'ACID_L', 'WATER_L', 'FAME/FAEE_H', 'GLYCEROL_H', 'ALCOHOL_H', 'OIL_H', 'DAG_H', 'MAG_H', 'ACID_H', 'WATER_H'])
 tie_lines_eval_np = tie_lines_eval.to_numpy()
 objective = np.sum((tie_lines_eval_np - results)**2, 1)/tie_lines_eval_np.shape[0]*100
+np.sum(objective)
 
-ref_results = pl.concat([tie_lines.select(["Ref", "Sub Ref"]), pl.DataFrame(objective, schema=["Squared Error"])], how="horizontal")
+ref_results = pl.concat([tie_lines.select(["Ref", "Sub Ref"]), pl.DataFrame(objective, schema=["Squared Error"])], how="horizontal").with_row_index()
 filtered_results = ref_results.filter(pl.col("Squared Error") > 0.1)
+tie_lines_test = tie_lines.with_row_index()
+tie_lines_test.filter(
+    pl.col("Ref") == 5,
+    pl.col("Sub Ref") == "a"
+    )
+#pl.DataFrame(results, schema=['FAME/FAEE_L', 'GLYCEROL_L', 'ALCOHOL_L', 'OIL_L', 'DAG_L', 'MAG_L', 'ACID_L', 'WATER_L', 'FAME/FAEE_H', 'GLYCEROL_H', 'ALCOHOL_H', 'OIL_H', 'DAG_H', 'MAG_H', 'ACID_H', 'WATER_H']).write_excel("results.xlsx")
+
+#filtered_results.write_excel("filtered_results.xlsx")
+
+    
 sns.set_theme(rc={'figure.figsize':(25,10)})
 sns.scatterplot(x = range(tie_lines_eval_np.shape[0]), y = objective)
 plt.show()
