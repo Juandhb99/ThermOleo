@@ -55,16 +55,6 @@ class ExperimentalValidation:
         self.num_components = len(self.component_list) 
         self.phi_names = ["phi_" + name for name in self.component_list]
         
-        raw_data = raw_data.with_columns( 
-        
-            [pl.when(pl.nth(i)==0.0)
-            .then(1e-20)
-            .otherwise(pl.nth(i))
-            .alias(raw_data.columns[i])
-            for i in range(self.num_components+1, self.num_components*2+1)]   # The parameters in the range function consider the columns with compositions of the light phase  
-            
-        )
-        
         condition = (
         (pl.col("OIL_L") > pl.col("OIL_H")))
 
@@ -73,9 +63,33 @@ class ExperimentalValidation:
             pl.when(condition).then(pl.col(f"{col}_H")).otherwise(pl.col(f"{col}_L")).alias(f"{col}_L") for col in self.component_list
         ] + [
             pl.when(condition).then(pl.col(f"{col}_L")).otherwise(pl.col(f"{col}_H")).alias(f"{col}_H") for col in self.component_list
-        ])
+        ])      
+         
+        raw_data = raw_data.with_columns( 
+        
+            [pl.when(pl.nth(i)==0.0)
+            .then(1e-20)
+            .otherwise(pl.nth(i))
+            .alias(raw_data.columns[i])
+            for i in range(self.num_components+1, self.num_components*2+1)]   # The parameters in the range function consider the columns with compositions of the light phase  
+            
+        ) 
             
         return raw_data, additional_columns
+    
+    def _swap_values(self, raw_data: pl.DataFrame):
+       
+        condition = (
+        (pl.col("OIL_L") > pl.col("OIL_H")))
+
+        # Swap values between columns ending with _L and _H
+        raw_data = raw_data.with_columns([
+            pl.when(condition).then(pl.col(f"{col}_H")).otherwise(pl.col(f"{col}_L")).alias(f"{col}_L") for col in self.component_list
+        ] + [
+            pl.when(condition).then(pl.col(f"{col}_L")).otherwise(pl.col(f"{col}_H")).alias(f"{col}_H") for col in self.component_list
+        ]) 
+        
+        return raw_data
     
     def _calculate_experimental_phi(self, raw_data: pl.DataFrame) -> pl.DataFrame: 
         """Calculates the experimental phi value for the light phase according to the mass balance formula for each component in the data
@@ -138,6 +152,7 @@ class ExperimentalValidation:
         """        
         
         raw_data, additional_columns = self._preprocess_data() 
+        #raw_data = self._swap_values(raw_data)
         experimental_phi = self._calculate_experimental_phi(raw_data=raw_data)  
         experimental_phi = experimental_phi.with_columns(
                         pl.struct(self.phi_names)

@@ -14,28 +14,6 @@ tie_lines = tie_lines.with_columns(
     pl.col("Sub Ref").str.slice(0, 1).alias("Sub Ref")
 ).with_row_index()
 
-tie_lines.filter(pl.col("WATER_L") > pl.col("WATER_H"))
-
-tie_lines.columns
-
-# Define the column suffixes for _L and _H
-suffixes = ["FAME/FAEE", "GLYCEROL", "ALCOHOL", "OIL", "DAG", "MAG", "ACID", "WATER"]
-
-# Define conditions where OIL_L > OIL_H, GLYCEROL_L > GLYCEROL_H, and WATER_L > WATER_H
-condition = (
-    (pl.col("OIL_L") > pl.col("OIL_H")))
-
-# Swap values between columns ending with _L and _H
-tie_lines = tie_lines.with_columns([
-    pl.when(condition).then(pl.col(f"{col}_H")).otherwise(pl.col(f"{col}_L")).alias(f"{col}_L") for col in suffixes
-] + [
-    pl.when(condition).then(pl.col(f"{col}_L")).otherwise(pl.col(f"{col}_H")).alias(f"{col}_H") for col in suffixes
-])
-
-tie_lines
-
-tie_lines.filter(pl.col("Ref")==46)
-
 tie_lines = tie_lines.drop(["Type Alcohol"])
 tie_lines_train = tie_lines.sample(fraction=0.8, with_replacement=False, seed=42).sort("index")
 tie_lines_validate = tie_lines.filter(~tie_lines["index"].is_in(tie_lines_train["index"]))
@@ -70,6 +48,7 @@ GIP_dortmund[:, :, 0] = GIP_unifac
 all_w_light = []
 all_w_heavy = []
 for name, data in group_tie_lines:
+    print(name)
     number_tie_lines = data.shape[0]
     tie_lines_np = data.drop(["Ref", "Sub Ref", "Temperature (K)"]).to_numpy()
     v = group_contribution.filter((pl.col("Ref") == name[0]) & (pl.col("Sub Ref") == name[1])).drop(["Ref", "Sub Ref"]).to_numpy()
@@ -85,6 +64,8 @@ for name, data in group_tie_lines:
     gamma_heavy = np.apply_along_axis(phase_distribution.calculate_gamma, 1, tie_lines_np[:, 16:24]) 
     gamma_light[mask_light] = 1
     gamma_heavy[mask_heavy] = 1 
+    
+    gamma_light = np.where(gamma_light == 0, 1e-20, gamma_light) 
     gamma_heavy = np.where(gamma_heavy == 0, 1e-20, gamma_heavy) 
     Ki = gamma_light/gamma_heavy 
     
@@ -95,40 +76,29 @@ for name, data in group_tie_lines:
     
     calculated_w_light = np.where(calculated_w_light >= 1, 0.999, calculated_w_light)  
     calculated_w_heavy = np.where(calculated_w_heavy >= 1, 0.999, calculated_w_heavy) 
+    calculated_w_light = np.where(calculated_w_light < 0, 0, calculated_w_light)  
+    calculated_w_heavy = np.where(calculated_w_heavy < 0, 0, calculated_w_heavy) 
     
     rearranged_w_light = calculated_w_light.copy()
     rearranged_w_heavy = calculated_w_heavy.copy()
     
-    #for i in range(number_tie_lines):
-        #if calculated_w_light[i, 1] > calculated_w_heavy[i, 1]:
-        #rearranged_w_light[i, 1] = calculated_w_heavy[i, 1]  
-        #rearranged_w_heavy[i, 1] = calculated_w_light[i, 1] 
-
-        #elif calculated_w_light[i, 3] > calculated_w_heavy[i, 3]:
-           #rearranged_w_light[i, 3] = calculated_w_heavy[i, 3] 
-           #rearranged_w_heavy[i, 3] = calculated_w_light[i, 3] 
-        
-        #elif calculated_w_light[i, 7] > calculated_w_heavy[i, 7]:
-           #rearranged_w_light[i, 7] = calculated_w_heavy[i, 7] 
-           #rearranged_w_heavy[i, 7] = calculated_w_light[i, 7] 
+    condition_GLY = calculated_w_light[:, 1] > calculated_w_heavy[:, 1]
+    calculated_w_light[condition_GLY], calculated_w_heavy[condition_GLY] = (
+    calculated_w_heavy[condition_GLY],
+    calculated_w_light[condition_GLY])
     
-    #all_w_light.append(rearranged_w_light)
-    #all_w_heavy.append(rearranged_w_heavy)
+    condition_OIL_1 = calculated_w_light[:, 3] > calculated_w_heavy[:, 3] 
+    condition_OIL_2 = tie_lines_np[:, 11] < tie_lines_np[:, 19]
+    combined_OIL = condition_OIL_1 & condition_OIL_2
+    calculated_w_light[combined_OIL], calculated_w_heavy[combined_OIL] = (
+    calculated_w_heavy[combined_OIL],
+    calculated_w_light[combined_OIL])
 
-    
-    if all(calculated_w_light[:,1] > calculated_w_heavy[:,1]):
-        rearranged_w_light = calculated_w_heavy
-        rearranged_w_heavy = calculated_w_light 
-        all_w_light.append(rearranged_w_light)
-        all_w_heavy.append(rearranged_w_heavy)
-    else:
-        all_w_light.append(calculated_w_light)
-        all_w_heavy.append(calculated_w_heavy)
 
-    #all_w_light.append(calculated_w_light)
-    #all_w_heavy.append(calculated_w_heavy)
+    all_w_light.append(calculated_w_light)
+    all_w_heavy.append(calculated_w_heavy)
 
-        
+         
 final_w_light = np.vstack(all_w_light)
 final_w_heavy = np.vstack(all_w_heavy)
 
@@ -142,13 +112,8 @@ np.sum(objective)
 ref_results = pl.concat([tie_lines.select(["Ref", "Sub Ref"]), pl.DataFrame(objective, schema=["Squared Error"])], how="horizontal").with_row_index()
 filtered_results = ref_results.filter(pl.col("Squared Error") > 0.1)
 tie_lines_test = tie_lines.with_row_index()
-tie_lines_test.filter(
-    pl.col("Ref") == 5,
-    pl.col("Sub Ref") == "a"
-    )
-#pl.DataFrame(results, schema=['FAME/FAEE_L', 'GLYCEROL_L', 'ALCOHOL_L', 'OIL_L', 'DAG_L', 'MAG_L', 'ACID_L', 'WATER_L', 'FAME/FAEE_H', 'GLYCEROL_H', 'ALCOHOL_H', 'OIL_H', 'DAG_H', 'MAG_H', 'ACID_H', 'WATER_H']).write_excel("results.xlsx")
-
-#filtered_results.write_excel("filtered_results.xlsx")
+pl.DataFrame(results, schema=['FAME/FAEE_L', 'GLYCEROL_L', 'ALCOHOL_L', 'OIL_L', 'DAG_L', 'MAG_L', 'ACID_L', 'WATER_L', 'FAME/FAEE_H', 'GLYCEROL_H', 'ALCOHOL_H', 'OIL_H', 'DAG_H', 'MAG_H', 'ACID_H', 'WATER_H']).write_excel("results.xlsx")
+filtered_results.write_excel("filtered_results.xlsx")
 
     
 sns.set_theme(rc={'figure.figsize':(25,10)})
