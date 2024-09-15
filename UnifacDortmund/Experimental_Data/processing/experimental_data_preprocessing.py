@@ -55,15 +55,15 @@ class ExperimentalValidation:
         self.num_components = len(self.component_list) 
         self.phi_names = ["phi_" + name for name in self.component_list]
         
-        condition = (
-        (pl.col("OIL_L") > pl.col("OIL_H")))
+        #condition = (
+        #(pl.col("OIL_L") > pl.col("OIL_H")))
 
         # Swap values between columns ending with _L and _H
-        raw_data = raw_data.with_columns([
-            pl.when(condition).then(pl.col(f"{col}_H")).otherwise(pl.col(f"{col}_L")).alias(f"{col}_L") for col in self.component_list
-        ] + [
-            pl.when(condition).then(pl.col(f"{col}_L")).otherwise(pl.col(f"{col}_H")).alias(f"{col}_H") for col in self.component_list
-        ])      
+        #raw_data = raw_data.with_columns([
+            #pl.when(condition).then(pl.col(f"{col}_H")).otherwise(pl.col(f"{col}_L")).alias(f"{col}_L") for col in self.component_list
+        #] + [
+        #    pl.when(condition).then(pl.col(f"{col}_L")).otherwise(pl.col(f"{col}_H")).alias(f"{col}_H") for col in self.component_list
+        #])      
          
         raw_data = raw_data.with_columns( 
         

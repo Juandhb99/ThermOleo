@@ -71,7 +71,8 @@ class MassBalanceReconciliation:
         min_variables = min_variables.reshape(n_rows, n_columns)         
         reconciled_light_composition = ((min_fixed[:, 0:n_components] - min_variables[:, 0:n_components]*(1-min_variables[:,-1].reshape(n_rows, 1)))/min_variables[:,-1].reshape(n_rows,1))
         lower_bound_constraint = reconciled_light_composition - 1e-5  
-        return lower_bound_constraint.flatten()
+        upper_bound_constraint = 1 - reconciled_light_composition - 1e-5  
+        return np.concatenate((lower_bound_constraint, upper_bound_constraint)).flatten()
     
     def _min_variables_constraints(self, min_variables: np.ndarray) -> np.ndarray:
         """This constrain assures that the iterated heavy phase composition and phi are not less than zero or greater than one.
@@ -151,7 +152,7 @@ class MassBalanceReconciliation:
         
         reconcile_database = pl.concat(reconcile_groups).drop("index")
         reconcile_database = reconcile_database.drop(self.phi_names)
-        reconcile_database.write_excel("refined_lle_data_v2.xlsx")
+        reconcile_database.write_excel("refined_lle_data_v3.xlsx")
 
 
    

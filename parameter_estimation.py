@@ -6,9 +6,9 @@ from scipy.optimize import newton, least_squares
 from UnifacDortmund import UnifacDortmund
 
 
-tie_lines = pl.read_excel(r"C:\Juan\Maestría\Code\oleosim\UnifacDortmund\Experimental_Data\data\refined_lle_data.xlsx", engine="calamine")
-group_contribution = pl.read_excel(r"C:\Juan\Maestría\Code\oleosim\UnifacDortmund\Experimental_Data\data\group_contribution.xlsx", engine="calamine")
-comps_MW = pl.read_excel(r"C:\Juan\Maestría\Code\oleosim\UnifacDortmund\Experimental_Data\data\comps_MW.xlsx", engine="calamine")
+tie_lines = pl.read_excel(r"D:\Juan\proyectos_personales\Maestría\Materias\Tesis\oleosim\UnifacDortmund\Experimental_Data\data\refined_lle_data_v3.xlsx", engine="calamine")
+group_contribution = pl.read_excel(r"D:\Juan\proyectos_personales\Maestría\Materias\Tesis\oleosim\UnifacDortmund\Experimental_Data\data\group_contribution.xlsx", engine="calamine")
+comps_MW = pl.read_excel(r"D:\Juan\proyectos_personales\Maestría\Materias\Tesis\oleosim\UnifacDortmund\Experimental_Data\data\comps_MW.xlsx", engine="calamine")
 
 tie_lines = tie_lines.with_columns(
     pl.col("Sub Ref").str.slice(0, 1).alias("Sub Ref")
@@ -47,8 +47,8 @@ GIP_dortmund[:, :, 0] = GIP_unifac
 
 all_w_light = []
 all_w_heavy = []
+
 for name, data in group_tie_lines:
-    print(name)
     number_tie_lines = data.shape[0]
     tie_lines_np = data.drop(["Ref", "Sub Ref", "Temperature (K)"]).to_numpy()
     v = group_contribution.filter((pl.col("Ref") == name[0]) & (pl.col("Sub Ref") == name[1])).drop(["Ref", "Sub Ref"]).to_numpy()
@@ -58,13 +58,13 @@ for name, data in group_tie_lines:
     phase_distribution = UnifacDortmund(GIP_dortmund, v, experiment_MW.reshape(8), name[2])
     gamma_light = np.zeros((number_tie_lines, 8))
     gamma_heavy = np.zeros((number_tie_lines, 8))
+    mask_feed = tie_lines_np[:, 0:8] == 0  
     mask_light = tie_lines_np[:, 8:16] == 0
     mask_heavy = tie_lines_np[:, 16:24] == 0
     gamma_light = np.apply_along_axis(phase_distribution.calculate_gamma, 1, tie_lines_np[:, 8:16]) 
     gamma_heavy = np.apply_along_axis(phase_distribution.calculate_gamma, 1, tie_lines_np[:, 16:24]) 
     gamma_light[mask_light] = 1
-    gamma_heavy[mask_heavy] = 1 
-    
+    gamma_heavy[mask_heavy] = 1  
     gamma_light = np.where(gamma_light == 0, 1e-20, gamma_light) 
     gamma_heavy = np.where(gamma_heavy == 0, 1e-20, gamma_heavy) 
     Ki = gamma_light/gamma_heavy 
@@ -78,23 +78,25 @@ for name, data in group_tie_lines:
     calculated_w_heavy = np.where(calculated_w_heavy >= 1, 0.999, calculated_w_heavy) 
     calculated_w_light = np.where(calculated_w_light < 0, 0, calculated_w_light)  
     calculated_w_heavy = np.where(calculated_w_heavy < 0, 0, calculated_w_heavy) 
-    
-    rearranged_w_light = calculated_w_light.copy()
-    rearranged_w_heavy = calculated_w_heavy.copy()
-    
+      
+
     condition_GLY = calculated_w_light[:, 1] > calculated_w_heavy[:, 1]
-    calculated_w_light[condition_GLY], calculated_w_heavy[condition_GLY] = (
-    calculated_w_heavy[condition_GLY],
-    calculated_w_light[condition_GLY])
-    
+
     condition_OIL_1 = calculated_w_light[:, 3] > calculated_w_heavy[:, 3] 
     condition_OIL_2 = tie_lines_np[:, 11] < tie_lines_np[:, 19]
-    combined_OIL = condition_OIL_1 & condition_OIL_2
-    calculated_w_light[combined_OIL], calculated_w_heavy[combined_OIL] = (
-    calculated_w_heavy[combined_OIL],
-    calculated_w_light[combined_OIL])
+    combined_OIL_1 = condition_OIL_1 & condition_OIL_2
+    
+    condition_OIL_3 = calculated_w_light[:, 3] < calculated_w_heavy[:, 3] 
+    condition_OIL_4 = tie_lines_np[:, 11] > tie_lines_np[:, 19]
+    combined_OIL_2 = condition_OIL_3 & condition_OIL_4
+    
+    total_condition = condition_GLY | combined_OIL_1 | combined_OIL_2
 
-
+    calculated_w_light[total_condition], calculated_w_heavy[total_condition] = (
+    calculated_w_heavy[total_condition],
+    calculated_w_light[total_condition])
+    
+    
     all_w_light.append(calculated_w_light)
     all_w_heavy.append(calculated_w_heavy)
 
@@ -106,14 +108,17 @@ final_w_heavy = np.vstack(all_w_heavy)
 results = np.hstack([final_w_light, final_w_heavy])
 tie_lines_eval = tie_lines.select(['FAME/FAEE_L', 'GLYCEROL_L', 'ALCOHOL_L', 'OIL_L', 'DAG_L', 'MAG_L', 'ACID_L', 'WATER_L', 'FAME/FAEE_H', 'GLYCEROL_H', 'ALCOHOL_H', 'OIL_H', 'DAG_H', 'MAG_H', 'ACID_H', 'WATER_H'])
 tie_lines_eval_np = tie_lines_eval.to_numpy()
+mask = tie_lines_eval_np == 0
+results[mask] = 0
 objective = np.sum((tie_lines_eval_np - results)**2, 1)/tie_lines_eval_np.shape[0]*100
 np.sum(objective)
 
 ref_results = pl.concat([tie_lines.select(["Ref", "Sub Ref"]), pl.DataFrame(objective, schema=["Squared Error"])], how="horizontal").with_row_index()
-filtered_results = ref_results.filter(pl.col("Squared Error") > 0.1)
+filtered_results = ref_results.filter(pl.col("Squared Error") > 0.05)
 tie_lines_test = tie_lines.with_row_index()
-pl.DataFrame(results, schema=['FAME/FAEE_L', 'GLYCEROL_L', 'ALCOHOL_L', 'OIL_L', 'DAG_L', 'MAG_L', 'ACID_L', 'WATER_L', 'FAME/FAEE_H', 'GLYCEROL_H', 'ALCOHOL_H', 'OIL_H', 'DAG_H', 'MAG_H', 'ACID_H', 'WATER_H']).write_excel("results.xlsx")
-filtered_results.write_excel("filtered_results.xlsx")
+
+pl.DataFrame(results, schema=['FAME/FAEE_L', 'GLYCEROL_L', 'ALCOHOL_L', 'OIL_L', 'DAG_L', 'MAG_L', 'ACID_L', 'WATER_L', 'FAME/FAEE_H', 'GLYCEROL_H', 'ALCOHOL_H', 'OIL_H', 'DAG_H', 'MAG_H', 'ACID_H', 'WATER_H']).write_excel("results2.xlsx")
+filtered_results.write_excel("filtered_results2.xlsx")
 
     
 sns.set_theme(rc={'figure.figsize':(25,10)})
