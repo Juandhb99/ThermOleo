@@ -6,7 +6,7 @@ from scipy.optimize import newton, least_squares, minimize
 from UnifacDortmund import UnifacDortmund
 
 
-tie_lines = pl.read_excel(r"D:\Juan\proyectos_personales\Maestría\Materias\Tesis\oleosim\UnifacDortmund\Experimental_Data\data\refined_lle_data_v3.xlsx", engine="calamine")
+tie_lines = pl.read_excel(r"D:\Juan\proyectos_personales\Maestría\Materias\Tesis\oleosim\UnifacDortmund\Experimental_Data\data\refined_lle_data_v4.xlsx", engine="calamine")
 group_contribution = pl.read_excel(r"D:\Juan\proyectos_personales\Maestría\Materias\Tesis\oleosim\UnifacDortmund\Experimental_Data\data\group_contribution.xlsx", engine="calamine")
 comps_MW = pl.read_excel(r"D:\Juan\proyectos_personales\Maestría\Materias\Tesis\oleosim\UnifacDortmund\Experimental_Data\data\comps_MW.xlsx", engine="calamine")
 
@@ -19,6 +19,10 @@ tie_lines_train = tie_lines.sample(fraction=0.8, with_replacement=False, seed=42
 tie_lines_validate = tie_lines.filter(~tie_lines["index"].is_in(tie_lines_train["index"]))
 tie_lines_train = tie_lines_train.drop(["index"])
 tie_lines_validate = tie_lines_validate.drop(["index"])
+
+#tie_lines_train.write_excel("train_data_V2.xlsx")
+#tie_lines_validate.write_excel("validate_data_V2.xlsx")
+
 
 group_contribution = group_contribution.drop(["MAG/DAG Profile?", "Additional FAME Profile?", "Acid mix Profile?", "Type Alcohol"])
 comps_MW = comps_MW.drop(["Type Alcohol"])
@@ -72,6 +76,7 @@ def objective_function(params):
        [init_C[1][3], init_C[1][3],    init_C[1][3],   init_C[4][2],  init_C[5][0],  init_C[5][2],      0,       init_C[3][4]],
        [init_C[1][4], init_C[1][4],    init_C[1][4],   init_C[4][3],  init_C[5][1],  init_C[5][3], init_C[5][4],        0   ]  
        ], dtype = np.float64)
+    
     all_w_light = []
     all_w_heavy = []
 
@@ -137,12 +142,12 @@ def objective_function(params):
 
 
 
-init_total = np.random.uniform(0, 0.15, 60)
+init_total = np.random.uniform(0.1, 0.3, 60)
 #res = least_squares(objective_function, init_total, method="dogbox")
 res = minimize(objective_function, init_total, method = "SLSQP")
 res
 res.x
-np.savetxt("UDortmundParamsV3.out", res.x)
+#np.savetxt("UDortmundParamsV4.out", res.x)
 
 ########################################################################################################
 
@@ -158,13 +163,14 @@ A = np.array([
        [20930.91, 20930.91,  20930.91,  -688.85, -14448.32, 1158.19, -1429.48,     0]
        ], dtype = np.float64)
 
-params = np.loadtxt(r"D:\Juan\proyectos_personales\Maestría\Materias\Tesis\oleosim\Evaluation\results\UDortmundParamsV3.out")
+#params = np.loadtxt(r"D:\Juan\proyectos_personales\Maestría\Materias\Tesis\oleosim\Evaluation\results\UDortmundParamsV3.out")
+params = res.x
+#params = np.zeros(60)
 init_B = params[0:30].reshape((6,5))
 init_C = params[30:61].reshape((6,5))
 
 
 GIP_dortmund = np.ones((8, 8, 3), dtype = np.float64)
-
 GIP_dortmund[:, :, 0] = A
 GIP_dortmund[:, :, 1] = np.array([
        [0,          0,                       0,        init_B[0][0], init_B[0][1], init_B[0][2],  init_B[0][3],  init_B[0][4]], 
@@ -260,5 +266,5 @@ np.sum(objective)
 ref_results = pl.concat([tie_lines.select(["Ref", "Sub Ref"]), pl.DataFrame(objective, schema=["Squared Error"])], how="horizontal").with_row_index()
 filtered_results = ref_results.filter(pl.col("Squared Error") > 0.05)
 tie_lines_test = tie_lines.with_row_index()
-pl.DataFrame(results, schema=['FAME/FAEE_L', 'GLYCEROL_L', 'ALCOHOL_L', 'OIL_L', 'DAG_L', 'MAG_L', 'ACID_L', 'WATER_L', 'FAME/FAEE_H', 'GLYCEROL_H', 'ALCOHOL_H', 'OIL_H', 'DAG_H', 'MAG_H', 'ACID_H', 'WATER_H']).write_excel("results_validate.xlsx")
+#pl.DataFrame(results, schema=['FAME/FAEE_L', 'GLYCEROL_L', 'ALCOHOL_L', 'OIL_L', 'DAG_L', 'MAG_L', 'ACID_L', 'WATER_L', 'FAME/FAEE_H', 'GLYCEROL_H', 'ALCOHOL_H', 'OIL_H', 'DAG_H', 'MAG_H', 'ACID_H', 'WATER_H']).write_excel("results_validate_V2.xlsx")
 #filtered_results.write_excel("filtered_results2.xlsx")
