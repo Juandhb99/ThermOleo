@@ -144,12 +144,12 @@ def objective_function(params):
 
 
 
-init_total = np.random.uniform(0, 0.5, 60)
+init_total = np.random.uniform(0, 0., 60)
 #res = least_squares(objective_function, init_total, method="dogbox")
 res = minimize(objective_function, init_total, method = "SLSQP")
 res
 res.x
-#np.savetxt("UDortmundParamsV4.out", res.x)
+#np.savetxt("UDortmundParamsV5.out", res.x)
 
 ########################################################################################################
 
@@ -166,8 +166,8 @@ A = np.array([
        ], dtype = np.float64)
 
 #params = np.loadtxt(r"D:\Juan\proyectos_personales\Maestría\Materias\Tesis\oleosim\Evaluation\results\UDortmundParamsV3.out")
-params = res.x
-#params = np.zeros(60)
+#params = res.x
+params = np.zeros(60)
 init_B = params[0:30].reshape((6,5))
 init_C = params[30:61].reshape((6,5))
 
@@ -197,7 +197,8 @@ GIP_dortmund[:, :, 2] = np.array([
        [init_C[1][4], init_C[1][4],    init_C[1][4],   init_C[4][3],  init_C[5][1],  init_C[5][3], init_C[5][4],        0   ]  
        ], dtype = np.float64)
 
-group_tie_lines = tie_lines_validate.group_by(["Ref", "Sub Ref", "Temperature (K)"], maintain_order=True)
+#group_tie_lines = tie_lines_validate.group_by(["Ref", "Sub Ref", "Temperature (K)"], maintain_order=True)
+group_tie_lines = tie_lines.group_by(["Ref", "Sub Ref", "Temperature (K)"], maintain_order=True)
 
 all_w_light = []
 all_w_heavy = []
@@ -258,15 +259,17 @@ for name, data in group_tie_lines:
 final_w_light = np.vstack(all_w_light)
 final_w_heavy = np.vstack(all_w_heavy)
 results = np.hstack([final_w_light, final_w_heavy])
-tie_lines_eval = tie_lines_validate.select(['FAME/FAEE_L', 'GLYCEROL_L', 'ALCOHOL_L', 'OIL_L', 'DAG_L', 'MAG_L', 'ACID_L', 'WATER_L', 'FAME/FAEE_H', 'GLYCEROL_H', 'ALCOHOL_H', 'OIL_H', 'DAG_H', 'MAG_H', 'ACID_H', 'WATER_H'])
+#tie_lines_eval = tie_lines_validate.select(['FAME/FAEE_L', 'GLYCEROL_L', 'ALCOHOL_L', 'OIL_L', 'DAG_L', 'MAG_L', 'ACID_L', 'WATER_L', 'FAME/FAEE_H', 'GLYCEROL_H', 'ALCOHOL_H', 'OIL_H', 'DAG_H', 'MAG_H', 'ACID_H', 'WATER_H'])
+tie_lines_eval = tie_lines.select(['FAME/FAEE_L', 'GLYCEROL_L', 'ALCOHOL_L', 'OIL_L', 'DAG_L', 'MAG_L', 'ACID_L', 'WATER_L', 'FAME/FAEE_H', 'GLYCEROL_H', 'ALCOHOL_H', 'OIL_H', 'DAG_H', 'MAG_H', 'ACID_H', 'WATER_H'])
 tie_lines_eval_np = tie_lines_eval.to_numpy()
 mask = tie_lines_eval_np == 0
 results[mask] = 0
-objective = np.sum((tie_lines_eval_np - results)**2, 1)/tie_lines_eval_np.shape[0]*100
-np.sum(objective)
+objective = root_mean_squared_error(tie_lines_eval_np, results)
+objective
+#np.sum(objective)
 
 ref_results = pl.concat([tie_lines.select(["Ref", "Sub Ref"]), pl.DataFrame(objective, schema=["Squared Error"])], how="horizontal").with_row_index()
 filtered_results = ref_results.filter(pl.col("Squared Error") > 0.05)
 tie_lines_test = tie_lines.with_row_index()
-#pl.DataFrame(results, schema=['FAME/FAEE_L', 'GLYCEROL_L', 'ALCOHOL_L', 'OIL_L', 'DAG_L', 'MAG_L', 'ACID_L', 'WATER_L', 'FAME/FAEE_H', 'GLYCEROL_H', 'ALCOHOL_H', 'OIL_H', 'DAG_H', 'MAG_H', 'ACID_H', 'WATER_H']).write_excel("results_validate_V2.xlsx")
+pl.DataFrame(results, schema=['FAME/FAEE_L', 'GLYCEROL_L', 'ALCOHOL_L', 'OIL_L', 'DAG_L', 'MAG_L', 'ACID_L', 'WATER_L', 'FAME/FAEE_H', 'GLYCEROL_H', 'ALCOHOL_H', 'OIL_H', 'DAG_H', 'MAG_H', 'ACID_H', 'WATER_H']).write_excel("results_validate_V3.xlsx")
 #filtered_results.write_excel("filtered_results2.xlsx")
