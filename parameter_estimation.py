@@ -144,7 +144,7 @@ def objective_function(params):
 
 
 
-init_total = np.random.uniform(0, 0., 60)
+init_total = np.random.uniform(0, 0.3, 60)
 #res = least_squares(objective_function, init_total, method="dogbox")
 res = minimize(objective_function, init_total, method = "SLSQP")
 res
@@ -166,8 +166,8 @@ A = np.array([
        ], dtype = np.float64)
 
 #params = np.loadtxt(r"D:\Juan\proyectos_personales\Maestría\Materias\Tesis\oleosim\Evaluation\results\UDortmundParamsV3.out")
-#params = res.x
-params = np.zeros(60)
+params = res.x
+#params = np.zeros(60)
 init_B = params[0:30].reshape((6,5))
 init_C = params[30:61].reshape((6,5))
 
