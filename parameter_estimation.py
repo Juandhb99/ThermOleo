@@ -3,6 +3,7 @@ import polars as pl
 import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy.optimize import newton, least_squares, minimize
+from sklearn.metrics import root_mean_squared_error
 from UnifacDortmund import UnifacDortmund
 
 
@@ -138,11 +139,12 @@ def objective_function(params):
     results[mask] = 0
     
     # Calculate the objective function value
-    return np.sum((tie_lines_eval_np - results) ** 2) / tie_lines_eval_np.shape[0] * 100
+    # np.sum((tie_lines_eval_np - results) ** 2) / tie_lines_eval_np.shape[0] * 100 
+    return root_mean_squared_error(tie_lines_eval_np, results)
 
 
 
-init_total = np.random.uniform(0.1, 0.3, 60)
+init_total = np.random.uniform(0, 0.5, 60)
 #res = least_squares(objective_function, init_total, method="dogbox")
 res = minimize(objective_function, init_total, method = "SLSQP")
 res
