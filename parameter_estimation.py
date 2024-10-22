@@ -1,7 +1,5 @@
 import numpy as np
 import polars as pl
-import matplotlib.pyplot as plt
-import seaborn as sns
 from scipy.optimize import newton, least_squares, minimize
 from sklearn.metrics import root_mean_squared_error
 from UnifacDortmund import UnifacDortmund
