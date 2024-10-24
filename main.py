@@ -1,16 +1,30 @@
 import numpy as np
 from Unifac import Unifac
 from UnifacDortmund import UnifacDortmund
-
+from PhaseCalculation import CalculateComps as cc
 
 def main(GIP_dortmund, v, MW, T, w):
     phase_distribution = UnifacDortmund(GIP_dortmund, v, MW, T)
     return np.apply_along_axis(phase_distribution.calculate_gamma, 1, w) # Apply the function per row of the matrix
 
-
-if __name__ == "__main__":
+def predict_test():
     
-    GIP_unifac = np.array([
+    data = np.array([[0.40, 0.40, 0.2, 0, 0, 0, 0, 0]])
+    v = np.array([[0.904, 1, 0, 3.713, 2.808, 1.904, 0.904, 0],
+                  [12.991, 2, 0, 40.974, 27.982, 14.991, 12.991, 0],
+                  [2, 0, 1, 3, 2, 1, 1, 0],
+                  [1.044, 0, 0, 3.131, 2.087, 1.044, 1.044, 0],
+                  [0.904, 3, 1, 2.713, 1.808, 0.904, 0.904, 0],
+                  [1, 0, 0, 3, 2, 1, 0, 0],
+                  [0, 0, 0, 0, 0, 0, 1, 0],
+                  [0, 0, 0, 0, 0, 0, 0, 1],
+                  ])
+    
+    data_MW = np.array([[324.140, 92.090, 32.040, 968.420, 659.280, 350.140, 296.140, 18]])
+    temp = 298.15
+    
+    thermo_model = UnifacDortmund
+    A = np.array([
        [0,          0,          0,     -3214.25, -1718.09, -3079.37, 1295.55,  1249.74], 
        [0,          0,          0,     -3214.25, -1718.09, -3079.37, 1295.55,  1249.74],
        [0,          0,          0,     -3214.25, -1718.09, -3079.37, 1295.55,  1249.74],
@@ -20,23 +34,42 @@ if __name__ == "__main__":
        [3714.86,  3714.86,   3714.86,   258.51,  -3227.03,  594.79,     0,      3239.57],
        [20930.91, 20930.91,  20930.91,  -688.85, -14448.32, 1158.19, -1429.48,     0]
        ], dtype = np.float64)
-
-    GIP_dortmund = np.zeros((8, 8, 3), dtype = np.float64)
-    GIP_dortmund[:, :, 0] = GIP_unifac
     
-    T = 298.15
-    v = np.array([
-    [0.9044,     1.0,  0,   0, 0, 0, 0, 0],
-    [12.9913,    2.0,  0,   0, 0, 0, 0, 0],
-    [2.0,        0,    1.0, 0, 0, 0, 0, 0],
-    [1.0435,     0,    0,   0, 0, 0, 0, 0],
-    [0.9044,     3.0,  1.0, 0, 0, 0, 0, 0],
-    [1.0,        0,    0,   0, 0, 0, 0, 0],
-    [0,          0,    0,   0, 0, 0, 0, 0],
-    [0,          0,    0,   0, 0, 0, 0, 0]], dtype = np.float64)
-
-    MW = np.array([324.139909, 92.09, 32.04, 878.0, 648.264, 370.138, 262.7856, 18], dtype = np.float64)
-    w = np.array([[0.856, 0.028, 0.116, 0, 0, 0, 0, 0],
-              [0.002265, 0.675, 0.323, 0, 0, 0, 0, 0]], dtype = np.float64) 
+    params = np.loadtxt(r"D:\Juan\proyectos_personales\Maestría\Materias\Tesis\oleosim\Evaluation\results\UDortmundParamsV5.out")
+    B = params[0:30].reshape((6,5))
+    C = params[30:61].reshape((6,5))
     
-    print(main(GIP_dortmund, v, MW, T, w))
+    B = np.array([
+       [0,          0,                       0,        B[0][0], B[0][1], B[0][2],  B[0][3],  B[0][4]], 
+       [0,          0,                       0,        B[0][0], B[0][1], B[0][2],  B[0][3],  B[0][4]],
+       [0,          0,                       0,        B[0][0], B[0][1], B[0][2],  B[0][3],  B[0][4]],
+       [B[1][0], B[1][0],    B[1][0],        0,       B[2][0], B[2][1],  B[2][2],  B[2][3]],
+       [B[1][1], B[1][1],    B[1][1],   B[4][0],           0,  B[2][4],  B[3][0],  B[3][1]], 
+       [B[1][2], B[1][2],    B[1][2],   B[4][1],  B[4][4],      0,       B[3][2],  B[3][3]], 
+       [B[1][3], B[1][3],    B[1][3],   B[4][2],  B[5][0],  B[5][2],      0,       B[3][4]],
+       [B[1][4], B[1][4],    B[1][4],   B[4][3],  B[5][1],  B[5][3], B[5][4],        0   ]  
+       ], dtype = np.float64)
+
+
+    C = np.array([
+       [0,          0,                       0,        C[0][0], C[0][1], C[0][2],  C[0][3],  C[0][4]], 
+       [0,          0,                       0,        C[0][0], C[0][1], C[0][2],  C[0][3],  C[0][4]],
+       [0,          0,                       0,        C[0][0], C[0][1], C[0][2],  C[0][3],  C[0][4]],
+       [C[1][0], C[1][0],    C[1][0],        0,       C[2][0], C[2][1],  C[2][2],  C[2][3]],
+       [C[1][1], C[1][1],    C[1][1],   C[4][0],           0,  C[2][4],  C[3][0],  C[3][1]], 
+       [C[1][2], C[1][2],    C[1][2],   C[4][1],  C[4][4],      0,       C[3][2],  C[3][3]], 
+       [C[1][3], C[1][3],    C[1][3],   C[4][2],  C[5][0],  C[5][2],      0,       C[3][4]],
+       [C[1][4], C[1][4],    C[1][4],   C[4][3],  C[5][1],  C[5][3], C[5][4],        0   ]  
+        ], dtype = np.float64)
+    
+    GIP = cc._define_GIP(A, B, C)
+    
+    w_light, w_heavy = cc.calculate_comps(data, v, data_MW, temp, thermo_model, GIP)
+    
+    return w_light, w_heavy
+    
+
+
+if __name__ == "__main__":
+    
+    print(predict_test())
