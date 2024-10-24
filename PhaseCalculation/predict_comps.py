@@ -7,9 +7,28 @@ from dataclasses import dataclass, field
 @dataclass
 class CalculateComps:
     
+    """
+        Algorithm to calculate the phase compositions using UNIFAC or UNIFAC Dortmund, the procedure to calculate the phase compositions
+        is iterative and is described in this paper "Costa, É. D., & Braga, J. P. (2024). The Rachford-Rice equation: application to ternary diagram. Revista Brasileira De Ensino De Física,
+        46. https://doi.org/10.1590/1806-9126-rbef-2024-0077".
+
+    """    
+    
     @staticmethod
-    def _process_data(input_data, group_contribution_data, split_fraction):
-        
+    def process_data(input_data: pl.DataFrame, group_contribution_data: pl.DataFrame, split_fraction: float):
+        """The process data method, takes the a group of global compositions each with their one temperature conditions and transforms them from 
+        polars dataframe format to numpy for predicting the phase compositions. 
+
+        Args:
+            input_data (pl.DataFrame): _description_
+            group_contribution_data (_type_): _description_
+            split_fraction (_type_): _description_
+
+        Returns:
+            _type_: _description_
+        """  
+        # changes this function.
+              
         input_data = input_data.with_columns( pl.col("Sub Ref").str.slice(0, 1).alias("Sub Ref")
         ).with_row_index()
 
@@ -27,15 +46,33 @@ class CalculateComps:
         return input_data, input_data_train, input_data_validate, group_contribution_data
    
     @staticmethod 
-    def _rachford_rice(x, Z, K):
+    def rachford_rice(x: np.ndarray, Z: np.ndarray, K: np.ndarray): 
+        """The rachford_rice method, applies the vectorized calculation of the rachford_rice algorithm for each tie line using mass fractions.
+        Args:
+            x (np.ndarray): Overrall mass fraction of the heavy phase, this is a nx1 matrix, where n will be the number of tie lines in the data.  
+            Z (np.ndarray): Mass composition of the feed, this is a nx8 matrix, where n will be the number of tie lines in the data.
+            K (np.ndarray): Matriz of distribution coefficients for each component in the mixture calculated from the activiy coefficient in each phase. This is a nx8 matrix where n will be the number of tie lines in the data.
+
+        Returns:
+            np.ndarray: Matrix of size 1xn that is the sum of the rachford-rice equation result for each component in the mixture.
+        """        
         return np.sum(Z*(K-1)/(1+(K-1)*x))
    
     @staticmethod 
-    def _rachford_rice_d1(x, Z, K): 
+    def rachford_rice_d1(x, Z, K): 
+        """The rachford_rice_d1 method, applies the vectorized calculation of the first derivative of the rachford_rice algorithm for each tie line using mass fractions.
+        Args:
+            x (np.ndarray): Overrall mass fraction of the heavy phase, this is a nx1 matrix, where n will be the number of tie lines in the data.  
+            Z (np.ndarray): Mass composition of the feed, this is a nx8 matrix, where n will be the number of tie lines in the data.
+            K (np.ndarray): Matriz of distribution coefficients for each component in the mixture calculated from the activiy coefficient in each phase. This is a nx8 matrix where n will be the number of tie lines in the data.
+
+        Returns:
+            np.ndarray: Matrix of size 1xn that is the sum of the rachford-rice first derivative equation result for each component in the mixture.
+        """   
         return np.sum(-Z*(K-1)**2/(1+(K-1)*x)**2)
     
     @staticmethod
-    def _define_GIP(A, B, C):
+    def define_GIP(A, B, C):
         
         GIP = np.ones((8, 8, 3), dtype=np.float64) 
         GIP[:, :, 0] = A
@@ -45,10 +82,10 @@ class CalculateComps:
         return GIP
     
     @staticmethod
-    def calculate_comps(data, v, data_MW, temp, thermo_model, GIP):
+    def calculate_comps(data, v, data_MW, temperature, thermo_model, GIP):
        
          
-        phase_distribution = thermo_model(GIP, v, data_MW, temp)
+        phase_distribution = thermo_model(GIP, v, data_MW, temperature)
 
         initial_w_light_guess = np.random.random((data.shape[0], 8))
         initial_w_heavy_guess = np.random.random((data.shape[0], 8))
@@ -65,15 +102,15 @@ class CalculateComps:
 
         while True:
            
-            gamma_light = np.apply_along_axis(phase_distribution.calculate_gamma, 1, initial_w_light_guess).reshape(1, 8) 
-            gamma_heavy = np.apply_along_axis(phase_distribution.calculate_gamma, 1, initial_w_heavy_guess).reshape(1, 8)     
+            gamma_light = np.apply_along_axis(phase_distribution.calculate_gamma, 1, initial_w_light_guess).reshape(data.shape[0], 8) 
+            gamma_heavy = np.apply_along_axis(phase_distribution.calculate_gamma, 1, initial_w_heavy_guess).reshape(data.shape[0], 8)     
             gamma_light[mask_light] = 1
             gamma_heavy[mask_heavy] = 1  
             gamma_light = np.where(gamma_light == 0, 1e-20, gamma_light) 
             gamma_heavy = np.where(gamma_heavy == 0, 1e-20, gamma_heavy) 
             Ki = gamma_light / gamma_heavy
             
-            sol = newton(CalculateComps._rachford_rice, fprime=CalculateComps._rachford_rice_d1, x0=phi_guess, args=(data, Ki))
+            sol = newton(CalculateComps.rachford_rice, fprime=CalculateComps.rachford_rice_d1, x0=phi_guess, args=(data, Ki))
             calculated_w_light = data / (1 + (Ki - 1) * sol)
             calculated_w_heavy = Ki * calculated_w_light
             

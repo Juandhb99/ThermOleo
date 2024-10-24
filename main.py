@@ -9,7 +9,9 @@ def main(GIP_dortmund, v, MW, T, w):
 
 def predict_test():
     
-    data = np.array([[0.40, 0.40, 0.2, 0, 0, 0, 0, 0]])
+    data = np.array([[0.40, 0.40, 0.2, 0, 0, 0, 0, 0], 
+                     [0.385, 0.385, 0.230, 0, 0, 0, 0, 0]])
+    
     v = np.array([[0.904, 1, 0, 3.713, 2.808, 1.904, 0.904, 0],
                   [12.991, 2, 0, 40.974, 27.982, 14.991, 12.991, 0],
                   [2, 0, 1, 3, 2, 1, 1, 0],
@@ -62,7 +64,7 @@ def predict_test():
        [C[1][4], C[1][4],    C[1][4],   C[4][3],  C[5][1],  C[5][3], C[5][4],        0   ]  
         ], dtype = np.float64)
     
-    GIP = cc._define_GIP(A, B, C)
+    GIP = cc.define_GIP(A, B, C)
     
     w_light, w_heavy = cc.calculate_comps(data, v, data_MW, temp, thermo_model, GIP)
     
