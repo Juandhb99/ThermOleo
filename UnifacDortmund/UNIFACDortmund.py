@@ -95,5 +95,5 @@ class UnifacDortmund:
         lngamma_c = self._combinatorial_contribution(w)
         lngamma_r = self._residual_contribution(w) 
         gamma = np.exp(lngamma_c + lngamma_r)
-        
+        gamma = np.clip(gamma, -1e10, 1e10) 
         return gamma

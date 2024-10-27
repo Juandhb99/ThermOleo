@@ -4,7 +4,7 @@ from scipy.optimize import newton, minimize
 from scipy.optimize import OptimizeResult
 from sklearn.metrics import root_mean_squared_error
 from dataclasses import dataclass
-from predict_comps import CalculateComps as cc 
+from .predict_comps import CalculateComps as cc 
 
 
 @dataclass

@@ -1,4 +1,5 @@
 import numpy as np
+import polars as pl
 from Unifac import Unifac
 from UnifacDortmund import UnifacDortmund
 from PhaseCalculation import CalculateComps as cc
@@ -7,23 +8,23 @@ def main(GIP_dortmund, v, MW, T, w):
     phase_distribution = UnifacDortmund(GIP_dortmund, v, MW, T)
     return np.apply_along_axis(phase_distribution.calculate_gamma, 1, w) # Apply the function per row of the matrix
 
-def predict_test():
+def predict_comps():
     
-    data = np.array([[0.40, 0.40, 0.2, 0, 0, 0, 0, 0], 
-                     [0.385, 0.385, 0.230, 0, 0, 0, 0, 0]])
     
-    v = np.array([[0.904, 1, 0, 3.713, 2.808, 1.904, 0.904, 0],
-                  [12.991, 2, 0, 40.974, 27.982, 14.991, 12.991, 0],
-                  [2, 0, 1, 3, 2, 1, 1, 0],
-                  [1.044, 0, 0, 3.131, 2.087, 1.044, 1.044, 0],
-                  [0.904, 3, 1, 2.713, 1.808, 0.904, 0.904, 0],
-                  [1, 0, 0, 3, 2, 1, 0, 0],
-                  [0, 0, 0, 0, 0, 0, 1, 0],
-                  [0, 0, 0, 0, 0, 0, 0, 1],
-                  ])
-    
-    data_MW = np.array([[324.140, 92.090, 32.040, 968.420, 659.280, 350.140, 296.140, 18]])
-    temp = 298.15
+    tie_lines = pl.read_excel(r"D:\Juan\proyectos_personales\Maestría\Materias\Tesis\oleosim\ExperimentalData\data\refined_lle_data_v4.xlsx", engine="calamine")
+    group_contribution = pl.read_excel(r"D:\Juan\proyectos_personales\Maestría\Materias\Tesis\oleosim\ExperimentalData\data\group_contribution.xlsx", engine="calamine")
+    comps_MW = pl.read_excel(r"D:\Juan\proyectos_personales\Maestría\Materias\Tesis\oleosim\ExperimentalData\data\comps_MW.xlsx", engine="calamine")
+
+    tie_lines = tie_lines.with_columns(
+        pl.col("Sub Ref").str.slice(0, 1).alias("Sub Ref")
+    ).with_row_index()
+
+    tie_lines = tie_lines.drop(["Type Alcohol"])
+
+    group_contribution = group_contribution.drop(["MAG/DAG Profile?", "Additional FAME Profile?", "Acid mix Profile?", "Type Alcohol"])
+    comps_MW = comps_MW.drop(["Type Alcohol"])
+    tie_lines = tie_lines.drop(["index"])
+    group_tie_lines = tie_lines.group_by(["Ref", "Sub Ref", "Temperature (K)"], maintain_order=True) 
     
     thermo_model = UnifacDortmund
 
@@ -34,18 +35,27 @@ def predict_test():
     
     params = np.loadtxt(r"D:\Juan\proyectos_personales\Maestría\Materias\Tesis\oleosim\Evaluation\results\UDortmundParamsV5.out")
     B = params[0:30]
-    C = params[30:60]
-    
-    params
-    
+    C = params[30:60] 
     GIP = cc.define_GIP(A, B, C)
-
-    results = cc.calculate_comps(data, v, data_MW, temp, thermo_model, GIP)
     
-    return results
+    results_list = []
+    for name, data in group_tie_lines:
+
+        if name[0] == 50:
+            continue
+        else:
+            tie_lines_np = data.drop(["Ref", "Sub Ref", "Temperature (K)", "Reconcile Phi"]).to_numpy()
+            v = group_contribution.filter((pl.col("Ref") == name[0]) & (pl.col("Sub Ref") == name[1])).drop(["Ref", "Sub Ref"]).to_numpy()
+            experiment_MW = comps_MW.filter((pl.col("Ref") == name[0]) & (pl.col("Sub Ref") == name[1])).drop(["Ref", "Sub Ref"]).to_numpy()
+            experiment_MW.reshape(8) 
+            results_list.append(cc.calculate_comps(tie_lines_np[:,0:8], v, experiment_MW, name[2], thermo_model, GIP))
+            print(name)
+    
+    results_total = np.vstack(results_list) 
+    pl.DataFrame(results_total, schema=['FAME/FAEE_L', 'GLYCEROL_L', 'ALCOHOL_L', 'OIL_L', 'DAG_L', 'MAG_L', 'ACID_L', 'WATER_L', 'FAME/FAEE_H', 'GLYCEROL_H', 'ALCOHOL_H', 'OIL_H', 'DAG_H', 'MAG_H', 'ACID_H', 'WATER_H']).write_excel("results_predict.xlsx") 
     
 
 
 if __name__ == "__main__":
     
-    print(predict_test())
+    print(predict_comps())

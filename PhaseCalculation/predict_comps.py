@@ -22,7 +22,9 @@ class CalculateComps:
 
         Returns:
             np.ndarray: Matrix of size 1xn that is the sum of the rachford-rice equation result for each component in the mixture.
-        """        
+        """         
+        # Clamp K values to prevent overflow
+        K = np.clip(K, -1e10, 1e10)  # Adjust limits as necessary
         return np.sum(Z*(K-1)/(1+(K-1)*x))
    
     @staticmethod 
@@ -31,11 +33,13 @@ class CalculateComps:
         Args:
             x (np.ndarray): Overrall mass fraction of the heavy phase, this is a nx1 matrix, where n will be the number of tie lines in the data.  
             Z (np.ndarray): Mass composition of the feed, this is a nx8 matrix, where n will be the number of tie lines in the data.
-            K (np.ndarray): Matriz of distribution coefficients for each component in the mixture calculated from the activiy coefficient in each phase. This is a nx8 matrix where n will be the number of tie lines in the data.
+            K (np.ndarray): Matrix of distribution coefficients for each component in the mixture calculated from the activiy coefficient in each phase. This is a nx8 matrix where n will be the number of tie lines in the data.
 
         Returns:
             np.ndarray: Matrix of size 1xn that is the sum of the rachford-rice first derivative equation result for each component in the mixture.
-        """   
+        """    
+        # Clamp K values to prevent overflow
+        K = np.clip(K, -1e10, 1e10)  # Adjust limits as necessary
         return np.sum(-Z*(K-1)**2/(1+(K-1)*x)**2)
     
     @staticmethod
@@ -97,7 +101,7 @@ class CalculateComps:
     
     @staticmethod
     def calculate_comps(data: np.ndarray, v: np.ndarray, data_MW: np.ndarray, temperature: float, thermo_model, GIP: np.ndarray) -> np.ndarray:
-        """The calcualte_comps method, calculates the component mass fraction in each of the phases following the procedure presented
+        """The calculate_comps method, calculates the component mass fraction in each of the phases following the procedure presented
         by "Costa, É. D., & Braga, J. P. (2024). The Rachford-Rice equation: application to ternary diagram. Revista Brasileira De Ensino De Física,
         46. https://doi.org/10.1590/1806-9126-rbef-2024-0077".
 
@@ -130,9 +134,10 @@ class CalculateComps:
         initial_w_heavy_guess = initial_w_heavy_guess/initial_w_heavy_guess.sum(axis = 1, keepdims=True)
  
         phi_guess = np.full((data.shape[0], 8), 0.5)
-
+        iter = 0
         while True:
-           
+            
+            iter += 1
             gamma_light = np.apply_along_axis(phase_distribution.calculate_gamma, 1, initial_w_light_guess).reshape(data.shape[0], 8) 
             gamma_heavy = np.apply_along_axis(phase_distribution.calculate_gamma, 1, initial_w_heavy_guess).reshape(data.shape[0], 8)     
             gamma_light[mask_light] = 1
@@ -141,7 +146,7 @@ class CalculateComps:
             gamma_heavy = np.where(gamma_heavy == 0, 1e-20, gamma_heavy) 
             Ki = gamma_light / gamma_heavy
             
-            sol = newton(CalculateComps.rachford_rice, fprime=CalculateComps.rachford_rice_d1, x0=phi_guess, args=(data, Ki))
+            sol = newton(CalculateComps.rachford_rice, fprime=CalculateComps.rachford_rice_d1, x0=phi_guess, args=(data, Ki), maxiter=150, tol = 1e-1)
             calculated_w_light = data / (1 + (Ki - 1) * sol)
             calculated_w_heavy = Ki * calculated_w_light
             
@@ -150,11 +155,11 @@ class CalculateComps:
             calculated_w_light = np.where(calculated_w_light < 0, 0, calculated_w_light)  
             calculated_w_heavy = np.where(calculated_w_heavy < 0, 0, calculated_w_heavy) 
             
-            light_error = (calculated_w_light - initial_w_light_guess)
-            heavy_error = (calculated_w_heavy - initial_w_heavy_guess) 
+            light_error = np.absolute(calculated_w_light - initial_w_light_guess)
+            heavy_error = np.absolute(calculated_w_heavy - initial_w_heavy_guess) 
                         
-            if (light_error < 0.0001).all() & (heavy_error < 0.0001).all():
-            
+            if (light_error < 0.001).all() & (heavy_error < 0.001).all() or iter >= 40:
+                 
                 condition_GLY = calculated_w_light[:, 1] > calculated_w_heavy[:, 1]
                 condition_OIL_1 = calculated_w_light[:, 3] > calculated_w_heavy[:, 3] 
                 condition_OIL_2 = calculated_w_light[:, 7] > calculated_w_heavy[:, 7] 
@@ -172,7 +177,7 @@ class CalculateComps:
             
             else:
                 initial_w_light_guess = calculated_w_light
-                initial_w_heavy_guess = calculated_w_heavy
+                initial_w_heavy_guess = calculated_w_heavy 
              
         return comp_results
 
