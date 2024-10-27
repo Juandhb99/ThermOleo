@@ -6,11 +6,10 @@ from dataclasses import dataclass
 
 @dataclass
 class CalculateComps: 
-    """
+    """ 
         Algorithm to calculate the phase compositions using UNIFAC or UNIFAC Dortmund, the procedure to calculate the phase compositions
         is iterative and is described in this paper "Costa, É. D., & Braga, J. P. (2024). The Rachford-Rice equation: application to ternary diagram. Revista Brasileira De Ensino De Física,
         46. https://doi.org/10.1590/1806-9126-rbef-2024-0077".
-
     """    
     
     @staticmethod 
@@ -108,7 +107,7 @@ class CalculateComps:
             data_MW (np.ndarray): Vector of molecular weights of the molecules in the system. This is a 1x8 vector that must have the following order
             FAME/FAEE, GLYCEROL, ALCOHOL, OIL, DAG, MAG, ACID, H2O.
             temperature (float): Temperature of the system in K.
-            thermo_model (): Thermodynamic model to use, either UNIFAC or UNIFAC Dortmund.
+            thermo_model (Unifac/UnifacDortmund): Thermodynamic model to use, either UNIFAC or UNIFAC Dortmund.
             GIP (np.ndarray): Matrix of group interaction parameters, this must be a 8x8x3 matrix where each column and row represents a
             functional group. The order must be CH, CH2, CH3, CH=CH, OH, CH2COO, COOH, H2O for both the columns and rows. The a, b and c GIP for the 
             unifac dortmund model are respectively must be the first, second and third layer of the GIP matrix. 

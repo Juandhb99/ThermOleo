@@ -1,6 +1,7 @@
 import numpy as np
 import polars as pl
 from scipy.optimize import newton, minimize 
+from scipy.optimize import OptimizeResult
 from sklearn.metrics import root_mean_squared_error
 from dataclasses import dataclass
 from predict_comps import CalculateComps as cc 
@@ -8,9 +9,27 @@ from predict_comps import CalculateComps as cc
 
 @dataclass
 class ParameterCorrelation:
+    
+    """
+        The ParameterCorrelation class has the objective to evaluate the prediction of phase composition with experimental data, an to optimize the parameters 
+        of the UNIFAC Dortmund model from that evaluation using the minimize function from scipy.
+    """    
    
     @staticmethod
-    def eval(params, group_tie_lines, group_contribution, comps_MW, thermo_model, data_eval):
+    def eval(params: np.ndarray, group_tie_lines: pl.DataFrame, group_contribution: pl.DataFrame, comps_MW: pl.DataFrame, thermo_model, data_eval: pl.DataFrame) -> float:
+        """Eval a dataset of experimental data with a defined set of GIP using the RMSE
+
+        Args:
+            params (np.ndarray): GIP, these is a 8x8x3 matrix of GIP of Unifac Dortmund
+            group_tie_lines (pl.DataFrame): Experimental data grouped by experiment
+            group_contribution (pl.DataFrame): Number of times that each group appears in each component using the pseudomolecule formula and the fatty acid profile.
+            comps_MW (pl.DataFrame): Pseudomolecule MW from the group contribution parameters.
+            thermo_model (UnifacDortmund): Thermodynamical model to use, (at the moment only UnifacDortmund)
+            data_eval (pl.DataFrame): Experimental phase composition data to evaluate thermodynamical model predicitons.
+
+        Returns:
+            float: RMSE of the experimental data vs the predicted data.
+        """        
        
         A = params[0:30]
         B = params[30:60]
@@ -81,9 +100,23 @@ class ParameterCorrelation:
         
         return root_mean_squared_error(tie_lines_eval_np, results)
     
-    def correlate_parameters(self, algorithm, group_tie_lines, group_contribution, comps_MW, thermo_model, data_eval):
+    def correlate_parameters(self, algorithm: str, group_tie_lines: pl.DataFrame, group_contribution: pl.DataFrame, comps_MW: pl.DataFrame, thermo_model, data_eval: pl.DataFrame) -> OptimizeResult:
+        """The correlate_parameters method applies a optimization algorithm using the scipy function minimize, to correlate the best GIP using the available
+            experimental data.
+
+        Args:
+            algorithm (str): Available algorithms for the scipy minimize function.
+            group_tie_lines (pl.DataFrame): Experimental data grouped by experiment
+            group_contribution (pl.DataFrame): Number of times that each group appears in each component using the pseudomolecule formula and the fatty acid profile.
+            comps_MW (pl.DataFrame): Pseudomolecule MW from the group contribution parameters.
+            thermo_model (UnifacDortmund): Thermodynamical model to use, (at the moment only UnifacDortmund)
+            data_eval (pl.DataFrame): Experimental phase composition data to evaluate thermodynamical model predicitons. 
+        
+        Returns:
+            OptimizeResult: Result from the minimize function.
+        """        
        
         initial_params = np.random.uniform(0, 0.3, 60) 
         opt = minimize(self.eval, initial_params, method=algorithm, args=(group_tie_lines, group_contribution, comps_MW, thermo_model, data_eval))
         
-        return opt, opt.x 
+        return opt
