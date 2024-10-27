@@ -27,7 +27,6 @@ def predict_test():
     
     thermo_model = UnifacDortmund
 
-
     A = np.array([-3214.25, -1718.09, -3079.37, 1295.55, 1249.74, 2900.56, 2900.56, 2900.56, -388.62, 259.13, 4925.67, 4925.67, 4925.67, 1047.08, -2424.84, 
                   2544.80, 2544.80, 2544.80, 258.51, -3227.03, 3714.86, 3714.86, 3714.86, -987.18, -688.85, 20930.91, 5084.03, -1210.44, -4618.51, -14448.32])
     
@@ -35,7 +34,9 @@ def predict_test():
     
     params = np.loadtxt(r"D:\Juan\proyectos_personales\Maestría\Materias\Tesis\oleosim\Evaluation\results\UDortmundParamsV5.out")
     B = params[0:30]
-    C = params[30:61]
+    C = params[30:60]
+    
+    params
     
     GIP = cc.define_GIP(A, B, C)
 
