@@ -118,19 +118,18 @@ class CalculateComps:
         """       
         comp_results = np.zeros((data.shape[0], 16)) 
         phase_distribution = thermo_model(GIP, v, data_MW, temperature)
+        mask_light = data == 0
+        mask_heavy = data == 0 
 
         initial_w_light_guess = np.random.random((data.shape[0], 8))
         initial_w_heavy_guess = np.random.random((data.shape[0], 8))
  
-        initial_w_light_guess[data == 0] = 0
-        initial_w_heavy_guess[data == 0] = 0
+        initial_w_light_guess[mask_light] = 0
+        initial_w_heavy_guess[mask_heavy] = 0
 
         initial_w_light_guess = initial_w_light_guess/initial_w_light_guess.sum(axis = 1, keepdims=True)
         initial_w_heavy_guess = initial_w_heavy_guess/initial_w_heavy_guess.sum(axis = 1, keepdims=True)
  
-        mask_light = initial_w_light_guess == 0
-        mask_heavy = initial_w_heavy_guess == 0 
-    
         phi_guess = np.full((data.shape[0], 8), 0.5)
 
         while True:
