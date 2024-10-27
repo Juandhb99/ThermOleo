@@ -22,7 +22,8 @@ class ParameterCorrelation:
         Args:
             params (np.ndarray): GIP, these is a 8x8x3 matrix of GIP of Unifac Dortmund
             group_tie_lines (pl.DataFrame): Experimental data grouped by experiment
-            group_contribution (pl.DataFrame): Number of times that each group appears in each component using the pseudomolecule formula and the fatty acid profile.
+            group_contribution (pl.DataFrame): Number of times that each group appears in each component using the 
+            pseudomolecule parameters and the fatty acid profile composition.
             comps_MW (pl.DataFrame): Pseudomolecule MW from the group contribution parameters.
             thermo_model (UnifacDortmund): Thermodynamical model to use, (at the moment only UnifacDortmund)
             data_eval (pl.DataFrame): Experimental phase composition data to evaluate thermodynamical model predicitons.
