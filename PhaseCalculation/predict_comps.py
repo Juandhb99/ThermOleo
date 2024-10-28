@@ -23,8 +23,6 @@ class CalculateComps:
         Returns:
             np.ndarray: Matrix of size 1xn that is the sum of the rachford-rice equation result for each component in the mixture.
         """         
-        # Clamp K values to prevent overflow
-        K = np.clip(K, -1e10, 1e10)  # Adjust limits as necessary
         return np.sum(Z*(K-1)/(1+(K-1)*x))
    
     @staticmethod 
@@ -38,8 +36,6 @@ class CalculateComps:
         Returns:
             np.ndarray: Matrix of size 1xn that is the sum of the rachford-rice first derivative equation result for each component in the mixture.
         """    
-        # Clamp K values to prevent overflow
-        K = np.clip(K, -1e10, 1e10)  # Adjust limits as necessary
         return np.sum(-Z*(K-1)**2/(1+(K-1)*x)**2)
     
     @staticmethod
@@ -100,7 +96,7 @@ class CalculateComps:
         return GIP
     
     @staticmethod
-    def calculate_comps(data: np.ndarray, v: np.ndarray, data_MW: np.ndarray, temperature: float, thermo_model, GIP: np.ndarray) -> np.ndarray:
+    def calculate_comps(data: np.ndarray, v: np.ndarray, data_MW: np.ndarray, temperature: float, thermo_model, GIP: np.ndarray, initial_guess: np.ndarray = None) -> np.ndarray:
         """The calculate_comps method, calculates the component mass fraction in each of the phases following the procedure presented
         by "Costa, É. D., & Braga, J. P. (2024). The Rachford-Rice equation: application to ternary diagram. Revista Brasileira De Ensino De Física,
         46. https://doi.org/10.1590/1806-9126-rbef-2024-0077".
@@ -123,18 +119,29 @@ class CalculateComps:
         phase_distribution = thermo_model(GIP, v, data_MW, temperature)
         mask_light = data == 0
         mask_heavy = data == 0 
+        
+        if initial_guess is not None:
+             
+            initial_w_light_guess = initial_guess[:,0:8]
+            initial_w_heavy_guess = initial_guess[:,8:16] 
 
-        initial_w_light_guess = np.random.random((data.shape[0], 8))
-        initial_w_heavy_guess = np.random.random((data.shape[0], 8))
- 
-        initial_w_light_guess[mask_light] = 0
-        initial_w_heavy_guess[mask_heavy] = 0
+            phi_guess_1 = initial_guess[:,-1].reshape(data.shape[0], 1)
 
-        initial_w_light_guess = initial_w_light_guess/initial_w_light_guess.sum(axis = 1, keepdims=True)
-        initial_w_heavy_guess = initial_w_heavy_guess/initial_w_heavy_guess.sum(axis = 1, keepdims=True)
- 
-        phi_guess = np.full((data.shape[0], 8), 0.5)
+            phi_guess = np.full((data.shape[0], 1), 0.5)
+        
+        else: 
+            
+            initial_w_light_guess = np.random.random((data.shape[0], 8))
+            initial_w_heavy_guess = np.random.random((data.shape[0], 8))
+            initial_w_light_guess[mask_light] = 0
+            initial_w_heavy_guess[mask_heavy] = 0
+            initial_w_light_guess = initial_w_light_guess/initial_w_light_guess.sum(axis = 1, keepdims=True)
+            initial_w_heavy_guess = initial_w_heavy_guess/initial_w_heavy_guess.sum(axis = 1, keepdims=True)
+            phi_guess = np.full((data.shape[0], 8), 0.5)
+              
         iter = 0
+        relaxation_factor = 0.7 
+        
         while True:
             
             iter += 1
@@ -144,9 +151,13 @@ class CalculateComps:
             gamma_heavy[mask_heavy] = 1  
             gamma_light = np.where(gamma_light == 0, 1e-20, gamma_light) 
             gamma_heavy = np.where(gamma_heavy == 0, 1e-20, gamma_heavy) 
-            Ki = gamma_light / gamma_heavy
-            
-            sol = newton(CalculateComps.rachford_rice, fprime=CalculateComps.rachford_rice_d1, x0=phi_guess, args=(data, Ki), maxiter=150, tol = 1e-1)
+            Ki = np.clip(gamma_light / gamma_heavy, 1e-2, 1e2)
+            try: 
+                sol = newton(CalculateComps.rachford_rice, fprime=CalculateComps.rachford_rice_d1, x0=phi_guess, args=(data, Ki), maxiter=100, tol = max(1e-2 / iter, 1e-6))
+                phi_guess = phi_guess + relaxation_factor * (sol - phi_guess) 
+            except RuntimeError:
+                print("RuntimeError Encountered in Newton")
+                 
             calculated_w_light = data / (1 + (Ki - 1) * sol)
             calculated_w_heavy = Ki * calculated_w_light
             
@@ -158,7 +169,7 @@ class CalculateComps:
             light_error = np.absolute(calculated_w_light - initial_w_light_guess)
             heavy_error = np.absolute(calculated_w_heavy - initial_w_heavy_guess) 
                         
-            if (light_error < 0.001).all() & (heavy_error < 0.001).all() or iter >= 40:
+            if (light_error < 0.001).all() & (heavy_error < 0.001).all() or iter >= 100:
                  
                 condition_GLY = calculated_w_light[:, 1] > calculated_w_heavy[:, 1]
                 condition_OIL_1 = calculated_w_light[:, 3] > calculated_w_heavy[:, 3] 
