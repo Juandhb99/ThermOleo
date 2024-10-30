@@ -32,7 +32,6 @@ tie_lines_eval = tie_lines_train.select(['FAME/FAEE_L', 'GLYCEROL_L', 'ALCOHOL_L
 tie_lines_eval_np = tie_lines_eval.to_numpy()    
 thermo_model = UnifacDortmund
 
-
 def predict_comps(params):
 
     A = np.array([-3214.25, -1718.09, -3079.37, 1295.55, 1249.74, 2900.56, 2900.56, 2900.56, -388.62, 259.13, 4925.67, 4925.67, 4925.67, 1047.08, -2424.84, 
@@ -60,10 +59,6 @@ def predict_comps(params):
     
     return root_mean_squared_error(tie_lines_eval_np, results_total)
 
-def callback(params):
-    global fval
-    result = predict_comps(params)
-    print(f"Iteration Number: {fval}", f"Value of function {result}")
      
 if __name__ == "__main__":
     
