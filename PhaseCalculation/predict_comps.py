@@ -113,6 +113,9 @@ class CalculateComps:
             GIP (np.ndarray): Matrix of group interaction parameters, this must be a 8x8x3 matrix where each column and row represents a
             functional group. The order must be CH, CH2, CH3, CH=CH, OH, CH2COO, COOH, H2O for both the columns and rows. The a, b and c GIP for the 
             unifac dortmund model are respectively must be the first, second and third layer of the GIP matrix. 
+            initial_guesss(np.ndarray): Matrix of initial guesses for the compositions of each component in each phase in the mixture and the light phase mass fraction. This is a 
+            matrix of size nx17 where n is the number of tie lines, the first 16 columns are the compositions in each phase (8 in the light and 8 in the heavy) and the last column
+            is the mass fraction.
 
         Returns:
             np.ndarray: Component mass fraction in each phase. This will be two matrices of time 
@@ -141,7 +144,7 @@ class CalculateComps:
             phi_guess = np.full((data.shape[0], 1), 0.5)
               
         iter = 0
-        relaxation_factor = 0.5 
+        relaxation_factor = 0.8 
         
         while True:
             
