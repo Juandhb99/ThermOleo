@@ -163,6 +163,7 @@ class CalculateComps:
                 
             except RuntimeError:
                 print("RuntimeError Encountered in minimize")
+                
             sol = sol.x.reshape(data.shape[0], 1)     
             calculated_w_light = data / (1 + (Ki - 1) * sol)
             calculated_w_heavy = Ki * calculated_w_light

@@ -34,10 +34,8 @@ def predict_comps():
 
     
     params = np.loadtxt(r"D:\Juan\proyectos_personales\Maestría\Materias\Tesis\oleosim\Evaluation\results\UDortmundParamsV5.out")
-    #B = params[0:30]
-    #C = params[30:60]
-    B = np.zeros(30)
-    C =  np.zeros(30)
+    B = params[0:30]
+    C = params[30:60]
     GIP = cc.define_GIP(A, B, C)
     
     results_list = []
