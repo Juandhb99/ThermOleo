@@ -1,6 +1,6 @@
 import numpy as np
 import polars as pl
-from scipy.optimize import newton
+from scipy.optimize import newton, minimize
 from dataclasses import dataclass
 
 
@@ -13,7 +13,7 @@ class CalculateComps:
     """    
     
     @staticmethod 
-    def rachford_rice(x: np.ndarray, Z: np.ndarray, K: np.ndarray) -> np.ndarray: 
+    def rachford_rice(x: np.ndarray, Z: np.ndarray, K: np.ndarray, tie_lines) -> np.ndarray: 
         """The rachford_rice method, applies the vectorized calculation of the rachford_rice algorithm for each tie line using mass fractions.
         Args:
             x (np.ndarray): Overrall mass fraction of the heavy phase, this is a nx1 matrix, where n will be the number of tie lines in the data.  
@@ -22,8 +22,9 @@ class CalculateComps:
 
         Returns:
             np.ndarray: Matrix of size 1xn that is the sum of the rachford-rice equation result for each component in the mixture.
-        """         
-        return np.sum(Z*(K-1)/(1+(K-1)*x))
+        """
+        x = x.reshape(tie_lines, 1)
+        return np.sum(Z*(K-1)/(1+(K-1)*x))**2
    
     @staticmethod 
     def rachford_rice_d1(x: np.ndarray, Z: np.ndarray, K: np.ndarray) -> np.ndarray: 
@@ -36,6 +37,7 @@ class CalculateComps:
         Returns:
             np.ndarray: Matrix of size 1xn that is the sum of the rachford-rice first derivative equation result for each component in the mixture.
         """    
+        
         return np.sum(-Z*(K-1)**2/(1+(K-1)*x)**2)
     
     @staticmethod
@@ -125,9 +127,8 @@ class CalculateComps:
             initial_w_light_guess = initial_guess[:,0:8]
             initial_w_heavy_guess = initial_guess[:,8:16] 
 
-            phi_guess_1 = initial_guess[:,-1].reshape(data.shape[0], 1)
+            phi_guess = (1 - initial_guess[:,-1])
 
-            phi_guess = np.full((data.shape[0], 1), 0.5)
         
         else: 
             
@@ -137,10 +138,10 @@ class CalculateComps:
             initial_w_heavy_guess[mask_heavy] = 0
             initial_w_light_guess = initial_w_light_guess/initial_w_light_guess.sum(axis = 1, keepdims=True)
             initial_w_heavy_guess = initial_w_heavy_guess/initial_w_heavy_guess.sum(axis = 1, keepdims=True)
-            phi_guess = np.full((data.shape[0], 8), 0.5)
+            phi_guess = np.full((data.shape[0], 1), 0.5)
               
         iter = 0
-        relaxation_factor = 0.7 
+        relaxation_factor = 0.5 
         
         while True:
             
@@ -153,11 +154,13 @@ class CalculateComps:
             gamma_heavy = np.where(gamma_heavy == 0, 1e-20, gamma_heavy) 
             Ki = np.clip(gamma_light / gamma_heavy, 1e-2, 1e2)
             try: 
-                sol = newton(CalculateComps.rachford_rice, fprime=CalculateComps.rachford_rice_d1, x0=phi_guess, args=(data, Ki), maxiter=100, tol = max(1e-2 / iter, 1e-6))
-                phi_guess = phi_guess + relaxation_factor * (sol - phi_guess) 
+                #sol = newton(CalculateComps.rachford_rice, fprime=CalculateComps.rachford_rice_d1, x0=phi_guess, args=(data, Ki), maxiter=100, tol = max(1e-2 / iter, 1e-6))
+                sol = minimize(CalculateComps.rachford_rice, x0=phi_guess, args=(data, Ki, data.shape[0]), bounds=[(0, 1)], tol = 1e-6)
+                phi_guess = phi_guess + relaxation_factor * (sol.x - phi_guess) 
+                
             except RuntimeError:
-                print("RuntimeError Encountered in Newton")
-                 
+                print("RuntimeError Encountered in minimize")
+            sol = sol.x.reshape(data.shape[0], 1)     
             calculated_w_light = data / (1 + (Ki - 1) * sol)
             calculated_w_heavy = Ki * calculated_w_light
             
