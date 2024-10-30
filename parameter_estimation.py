@@ -55,10 +55,13 @@ def predict_comps(params):
     tie_lines_eval_np = tie_lines_eval.to_numpy()    
     mask = tie_lines_eval_np == 0
     results_total[mask] = 0 
-    pl.DataFrame(results_total, schema=['FAME/FAEE_L', 'GLYCEROL_L', 'ALCOHOL_L', 'OIL_L', 'DAG_L', 'MAG_L', 'ACID_L', 'WATER_L', 'FAME/FAEE_H', 'GLYCEROL_H', 'ALCOHOL_H', 'OIL_H', 'DAG_H', 'MAG_H', 'ACID_H', 'WATER_H']).write_excel("prediction_results.xlsx") 
+    #pl.DataFrame(results_total, schema=['FAME/FAEE_L', 'GLYCEROL_L', 'ALCOHOL_L', 'OIL_L', 'DAG_L', 'MAG_L', 'ACID_L', 'WATER_L', 'FAME/FAEE_H', 'GLYCEROL_H', 'ALCOHOL_H', 'OIL_H', 'DAG_H', 'MAG_H', 'ACID_H', 'WATER_H']).write_excel("prediction_results.xlsx") 
     
     return root_mean_squared_error(tie_lines_eval_np, results_total)
 
+def callback(params):
+    result = predict_comps(params)
+    print(f"The value of the function is: {result}")
      
 if __name__ == "__main__":
     
