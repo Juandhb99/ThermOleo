@@ -2,7 +2,7 @@ import time
 import numpy as np
 import polars as pl
 from sklearn.metrics import root_mean_squared_error
-from scipy.optimize import  minimize
+from scipy.optimize import  minimize, least_squares, differential_evolution
 from Unifac import Unifac
 from UnifacDortmund import UnifacDortmund
 from PhaseCalculation import CalculateComps as cc
@@ -51,17 +51,17 @@ def predict_comps(params, tie_lines_eval_np):
     results_total = np.vstack(results_list) 
     mask = tie_lines_eval_np == 0
     results_total[mask] = 0 
-    
-    return root_mean_squared_error(tie_lines_eval_np, results_total)
+    value = root_mean_squared_error(tie_lines_eval_np, results_total)
+    print("Function value in current evaluation: ", value) 
+    return value
 
-def callback(params):
-    result = predict_comps(params)
-    print(f"The value of the function is: {result}")
-     
 if __name__ == "__main__":
     
     init_total = np.random.uniform(0, 0.5, 60)
-    res = minimize(predict_comps, init_total, method = "Nelder-Mead", args=(tie_lines_eval_np), options={"disp": True})
+    bounds = [(0,1)]*60
+    #res = minimize(predict_comps, init_total, method = "Nelder-Mead", args=(tie_lines_eval_np, ))
+    #res = least_squares(fun=predict_comps, x0=init_total, args=(tie_lines_eval_np,))
+    res = differential_evolution(func = predict_comps, bounds=bounds, args=(tie_lines_eval_np,))
     print("The final value of the function is: ", res.fun)
     end_time = time.time()
     print(f"Total time: {end_time - start_time:.2f} seconds")

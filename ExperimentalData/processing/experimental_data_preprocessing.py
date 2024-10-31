@@ -66,17 +66,24 @@ class ExperimentalValidation:
             pl.DataFrame: Experimental data with the organized phases. 
         """      
        
-        condition = (
-        (pl.col("OIL_L") > pl.col("OIL_H")))
+        condition_oil = pl.col("OIL_L") > pl.col("OIL_H")
+        condition_glycerol = pl.col("GLYCEROL_L") > pl.col("GLYCEROL_H")
 
-        # Swap values between columns ending with _L and _H
+        # Swap values between columns ending with _L and _H based on oil condition
         raw_data = raw_data.with_columns([
-            pl.when(condition).then(pl.col(f"{col}_H")).otherwise(pl.col(f"{col}_L")).alias(f"{col}_L") for col in self.component_list
+            pl.when(condition_oil).then(pl.col(f"{col}_H")).otherwise(pl.col(f"{col}_L")).alias(f"{col}_L") for col in self.component_list
         ] + [
-            pl.when(condition).then(pl.col(f"{col}_L")).otherwise(pl.col(f"{col}_H")).alias(f"{col}_H") for col in self.component_list
+            pl.when(condition_oil).then(pl.col(f"{col}_L")).otherwise(pl.col(f"{col}_H")).alias(f"{col}_H") for col in self.component_list
         ]) 
+
+        # Swap values between columns ending with _L and _H based on glycerol condition
+        raw_data = raw_data.with_columns([
+            pl.when(condition_glycerol).then(pl.col(f"{col}_H")).otherwise(pl.col(f"{col}_L")).alias(f"{col}_L") for col in self.component_list
+        ] + [
+            pl.when(condition_glycerol).then(pl.col(f"{col}_L")).otherwise(pl.col(f"{col}_H")).alias(f"{col}_H") for col in self.component_list
+        ])
         
-        return raw_data    
+        return raw_data  
         
     def _preprocess_data(self, raw_data: pl.DataFrame) -> pl.DataFrame:
         """Load the dataframe from the path given, and remove possible calculations indeterminations by changing the 0 fraction of the light phase compositions to 1e-20
@@ -159,6 +166,7 @@ class ExperimentalValidation:
             pl.DataFrame: Join dataframe with the experimental data, the experimental phi and the indication of validated data 
         """        
         raw_data, additional_columns = self._load_data() 
+        raw_data = self._swap_values(raw_data)
         raw_data = self._preprocess_data(raw_data) 
         experimental_phi = self._calculate_experimental_phi(raw_data=raw_data)  
         experimental_phi = experimental_phi.with_columns(
