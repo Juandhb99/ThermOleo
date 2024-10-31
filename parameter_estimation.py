@@ -17,7 +17,6 @@ tie_lines = tie_lines.with_columns(
     ).with_row_index()
 
 tie_lines = tie_lines.drop(["Type Alcohol"])
-tie_lines = tie_lines.drop(["Type Alcohol"])
 tie_lines_train = tie_lines.sample(fraction=0.8, with_replacement=False, seed=42).sort("index")
 tie_lines_validate = tie_lines.filter(~tie_lines["index"].is_in(tie_lines_train["index"]))
 tie_lines_train = tie_lines_train.drop(["index"])
@@ -32,7 +31,7 @@ tie_lines_eval = tie_lines_train.select(['FAME/FAEE_L', 'GLYCEROL_L', 'ALCOHOL_L
 tie_lines_eval_np = tie_lines_eval.to_numpy()    
 thermo_model = UnifacDortmund
 
-def predict_comps(params):
+def predict_comps(params, tie_lines_eval_np):
 
     A = np.array([-3214.25, -1718.09, -3079.37, 1295.55, 1249.74, 2900.56, 2900.56, 2900.56, -388.62, 259.13, 4925.67, 4925.67, 4925.67, 1047.08, -2424.84, 
                   2544.80, 2544.80, 2544.80, 258.51, -3227.03, 3714.86, 3714.86, 3714.86, -987.18, -688.85, 20930.91, 5084.03, -1210.44, -4618.51, -14448.32]) 
@@ -50,9 +49,6 @@ def predict_comps(params):
         results_list.append(cc.calculate_comps(tie_lines_np[:,0:8], v, experiment_MW, name[2], thermo_model, GIP, initial_guess=tie_lines_np[:,8:25]))
     
     results_total = np.vstack(results_list) 
-
-    tie_lines_eval = tie_lines_train.select(['FAME/FAEE_L', 'GLYCEROL_L', 'ALCOHOL_L', 'OIL_L', 'DAG_L', 'MAG_L', 'ACID_L', 'WATER_L', 'FAME/FAEE_H', 'GLYCEROL_H', 'ALCOHOL_H', 'OIL_H', 'DAG_H', 'MAG_H', 'ACID_H', 'WATER_H'])
-    tie_lines_eval_np = tie_lines_eval.to_numpy()    
     mask = tie_lines_eval_np == 0
     results_total[mask] = 0 
     
@@ -65,7 +61,7 @@ def callback(params):
 if __name__ == "__main__":
     
     init_total = np.random.uniform(0, 0.5, 60)
-    res = minimize(predict_comps, init_total, method = "SLSQP", options={"disp": True})
+    res = minimize(predict_comps, init_total, method = "Nelder-Mead", args=(tie_lines_eval_np), options={"disp": True})
     print("The final value of the function is: ", res.fun)
     end_time = time.time()
     print(f"Total time: {end_time - start_time:.2f} seconds")

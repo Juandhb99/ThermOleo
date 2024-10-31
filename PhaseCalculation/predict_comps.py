@@ -144,7 +144,7 @@ class CalculateComps:
             phi_guess = np.full((data.shape[0], 1), 0.5)
               
         iter = 0
-        relaxation_factor = 0.8 
+        #relaxation_factor = 0.8 
         
         while True:
             
@@ -158,8 +158,8 @@ class CalculateComps:
             Ki = np.clip(gamma_light / gamma_heavy, 1e-2, 1e2)
             try: 
                 #sol = newton(CalculateComps.rachford_rice, fprime=CalculateComps.rachford_rice_d1, x0=phi_guess, args=(data, Ki), maxiter=100, tol = max(1e-2 / iter, 1e-6))
-                sol = minimize(CalculateComps.rachford_rice, x0=phi_guess, args=(data, Ki, data.shape[0]), bounds=[(0, 1)], tol = 1e-6)
-                phi_guess = phi_guess + relaxation_factor * (sol.x - phi_guess) 
+                sol = minimize(CalculateComps.rachford_rice, x0=phi_guess,  args=(data, Ki, data.shape[0]), bounds=[(0, 1)], tol = 1e-6)
+                #phi_guess = phi_guess + relaxation_factor * (sol.x - phi_guess) 
                 
             except RuntimeError:
                 print("RuntimeError Encountered in minimize")
