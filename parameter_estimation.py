@@ -65,7 +65,7 @@ def callback(params):
      
 if __name__ == "__main__":
     
-    init_total = np.random.uniform(0, 1, 60)
+    init_total = np.random.uniform(0, 0.5, 60)
     res = minimize(predict_comps, init_total, method = "SLSQP", options={"disp": True})
     print("The final value of the function is: ", res.fun)
     end_time = time.time()
