@@ -68,6 +68,7 @@ class ExperimentalValidation:
        
         condition_oil = pl.col("OIL_L") > pl.col("OIL_H")
         condition_glycerol = pl.col("GLYCEROL_L") > pl.col("GLYCEROL_H")
+        condition_water = pl.col("WATER_L") > pl.col("WATER_H")
 
         # Swap values between columns ending with _L and _H based on oil condition
         raw_data = raw_data.with_columns([
@@ -82,6 +83,13 @@ class ExperimentalValidation:
         ] + [
             pl.when(condition_glycerol).then(pl.col(f"{col}_L")).otherwise(pl.col(f"{col}_H")).alias(f"{col}_H") for col in self.component_list
         ])
+        
+        raw_data = raw_data.with_columns([
+            pl.when(condition_water).then(pl.col(f"{col}_H")).otherwise(pl.col(f"{col}_L")).alias(f"{col}_L") for col in self.component_list
+        ] + [
+            pl.when(condition_water).then(pl.col(f"{col}_L")).otherwise(pl.col(f"{col}_H")).alias(f"{col}_H") for col in self.component_list
+        ])
+        
         
         return raw_data  
         
