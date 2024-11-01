@@ -129,9 +129,7 @@ class CalculateComps:
              
             initial_w_light_guess = initial_guess[:,0:8]
             initial_w_heavy_guess = initial_guess[:,8:16] 
-
             phi_guess = (1 - initial_guess[:,-1])
-
         
         else: 
             
@@ -141,7 +139,7 @@ class CalculateComps:
             initial_w_heavy_guess[mask_heavy] = 0
             initial_w_light_guess = initial_w_light_guess/initial_w_light_guess.sum(axis = 1, keepdims=True)
             initial_w_heavy_guess = initial_w_heavy_guess/initial_w_heavy_guess.sum(axis = 1, keepdims=True)
-            phi_guess = np.full((data.shape[0], 1), 0.5)
+            phi_guess = np.full((data.shape[0], ), 0.5)
               
         iter = 0
         #relaxation_factor = 0.8 
@@ -155,9 +153,8 @@ class CalculateComps:
             gamma_heavy[mask_heavy] = 1  
             gamma_light = np.where(gamma_light == 0, 1e-20, gamma_light) 
             gamma_heavy = np.where(gamma_heavy == 0, 1e-20, gamma_heavy) 
-            Ki = np.clip(gamma_light / gamma_heavy, 1e-2, 1e2)
+            Ki = np.clip(gamma_light / gamma_heavy, 1e-6, 1e6)
             try: 
-                #sol = newton(CalculateComps.rachford_rice, fprime=CalculateComps.rachford_rice_d1, x0=phi_guess, args=(data, Ki), maxiter=100, tol = max(1e-2 / iter, 1e-6))
                 sol = minimize(CalculateComps.rachford_rice, x0=phi_guess,  args=(data, Ki, data.shape[0]), bounds=[(0, 1)], tol = 1e-6)
                 #phi_guess = phi_guess + relaxation_factor * (sol.x - phi_guess) 
                 

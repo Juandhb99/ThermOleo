@@ -76,7 +76,7 @@ def predict_comps():
     results_total = np.vstack(results_list) 
     pl.DataFrame(results_total, schema=['FAME/FAEE_L', 'GLYCEROL_L', 'ALCOHOL_L', 'OIL_L', 'DAG_L', 'MAG_L', 'ACID_L', 'WATER_L', 'FAME/FAEE_H', 'GLYCEROL_H', 'ALCOHOL_H', 'OIL_H', 'DAG_H', 'MAG_H', 'ACID_H', 'WATER_H']).write_excel("results_predict.xlsx") 
     
-def predict_comps_eval(params):
+def predict_comps_eval(params, initial_guess=None):
 
     A = np.array([-3214.25, -1718.09, -3079.37, 1295.55, 1249.74, 2900.56, 2900.56, 2900.56, -388.62, 259.13, 4925.67, 4925.67, 4925.67, 1047.08, -2424.84, 
                   2544.80, 2544.80, 2544.80, 258.51, -3227.03, 3714.86, 3714.86, 3714.86, -987.18, -688.85, 20930.91, 5084.03, -1210.44, -4618.51, -14448.32]) 
@@ -92,7 +92,7 @@ def predict_comps_eval(params):
         v = group_contribution.filter((pl.col("Ref") == name[0]) & (pl.col("Sub Ref") == name[1])).drop(["Ref", "Sub Ref"]).to_numpy()
         experiment_MW = comps_MW.filter((pl.col("Ref") == name[0]) & (pl.col("Sub Ref") == name[1])).drop(["Ref", "Sub Ref"]).to_numpy()
         experiment_MW.reshape(8) 
-        results_list.append(cc.calculate_comps(tie_lines_np[:,0:8], v, experiment_MW, name[2], thermo_model, GIP, initial_guess=tie_lines_np[:,8:25]))
+        results_list.append(cc.calculate_comps(tie_lines_np[:,0:8], v, experiment_MW, name[2], thermo_model, GIP, initial_guess=initial_guess))
     
     results_total = np.vstack(results_list) 
 
@@ -107,6 +107,6 @@ def predict_comps_eval(params):
 if __name__ == "__main__":
    
     
-    #params = np.loadtxt(r"C:\Juan\Maestría\Code\oleosim\Evaluation\Deterministic optimization\results 1 attempt\UDortmundParamsV5.out")
-    params = np.zeros(60)
+    params = np.loadtxt(r"C:\Juan\Maestría\Code\oleosim\Evaluation\Deterministic optimization\results 2 attempt\UDortmundParamsV2.out")
+    #params = np.zeros(60)
     print(predict_comps_eval(params))

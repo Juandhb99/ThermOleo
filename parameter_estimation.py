@@ -1,4 +1,6 @@
+import os
 import time
+import json
 import numpy as np
 import polars as pl
 from sklearn.metrics import root_mean_squared_error
@@ -30,8 +32,9 @@ group_tie_lines = tie_lines_train.group_by(["Ref", "Sub Ref", "Temperature (K)"]
 tie_lines_eval = tie_lines_train.select(['FAME/FAEE_L', 'GLYCEROL_L', 'ALCOHOL_L', 'OIL_L', 'DAG_L', 'MAG_L', 'ACID_L', 'WATER_L', 'FAME/FAEE_H', 'GLYCEROL_H', 'ALCOHOL_H', 'OIL_H', 'DAG_H', 'MAG_H', 'ACID_H', 'WATER_H'])
 tie_lines_eval_np = tie_lines_eval.to_numpy()    
 thermo_model = UnifacDortmund
+evaluation_log = []
 
-def predict_comps(params, tie_lines_eval_np):
+def predict_comps(params: np.ndarray, tie_lines_eval_np: np.ndarray, log_name: str):
 
     A = np.array([-3214.25, -1718.09, -3079.37, 1295.55, 1249.74, 2900.56, 2900.56, 2900.56, -388.62, 259.13, 4925.67, 4925.67, 4925.67, 1047.08, -2424.84, 
                   2544.80, 2544.80, 2544.80, 258.51, -3227.03, 3714.86, 3714.86, 3714.86, -987.18, -688.85, 20930.91, 5084.03, -1210.44, -4618.51, -14448.32]) 
@@ -52,16 +55,28 @@ def predict_comps(params, tie_lines_eval_np):
     mask = tie_lines_eval_np == 0
     results_total[mask] = 0 
     value = root_mean_squared_error(tie_lines_eval_np, results_total)
-    print("Function value in current evaluation: ", value) 
+
+    log_entry = {
+        
+        "value": value,
+        "params": params.tolist()
+    }    
+    
+    evaluation_log.append(log_entry)
+    
+    with open(log_name, "w") as json_file:
+        json.dump(evaluation_log, json_file, indent=4 )
+
+    print("Func evaluation: ", value)
     return value
 
 if __name__ == "__main__":
     
-    init_total = np.random.uniform(0, 0.5, 60)
-    bounds = [(0,1)]*60
+    #init_total = np.random.uniform(0, 0.5, 60)
+    bounds = [(0, 0.5)]*60
     #res = minimize(predict_comps, init_total, method = "Nelder-Mead", args=(tie_lines_eval_np, ))
     #res = least_squares(fun=predict_comps, x0=init_total, args=(tie_lines_eval_np,))
-    res = differential_evolution(func = predict_comps, bounds=bounds, args=(tie_lines_eval_np,))
+    res = differential_evolution(func = predict_comps, bounds=bounds, args=(tie_lines_eval_np, "differential_evolution_log_(1-11-24).json",))
     print("The final value of the function is: ", res.fun)
     end_time = time.time()
     print(f"Total time: {end_time - start_time:.2f} seconds")
