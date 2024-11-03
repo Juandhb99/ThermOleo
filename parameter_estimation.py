@@ -9,7 +9,6 @@ from Unifac import Unifac
 from UnifacDortmund import UnifacDortmund
 from PhaseCalculation import CalculateComps as cc
 
-start_time = time.time()
 tie_lines = pl.read_excel(r"D:\Juan\proyectos_personales\Maestría\Materias\Tesis\oleosim\ExperimentalData\data\new_refined_data\refined_lle_data_v5.xlsx", engine="calamine")
 group_contribution = pl.read_excel(r"D:\Juan\proyectos_personales\Maestría\Materias\Tesis\oleosim\ExperimentalData\data\group_contribution.xlsx", engine="calamine")
 comps_MW = pl.read_excel(r"D:\Juan\proyectos_personales\Maestría\Materias\Tesis\oleosim\ExperimentalData\data\comps_MW.xlsx", engine="calamine")
@@ -78,8 +77,4 @@ if __name__ == "__main__":
     #res = least_squares(fun=predict_comps, x0=init_total, args=(tie_lines_eval_np,))
     res = differential_evolution(func = predict_comps, bounds=bounds, args=(tie_lines_eval_np,))
     #res = dual_annealing(func = predict_comps, bounds=bounds, args=(tie_lines_eval_np,))
-    print("The final value of the function is: ", res.fun)
-    end_time = time.time()
-    print(f"Total time: {end_time - start_time:.2f} seconds")
-    np.savetxt("UDortmundParamsV1.out", res.x)
     
