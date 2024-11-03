@@ -6,9 +6,9 @@ from UnifacDortmund import UnifacDortmund
 from PhaseCalculation import CalculateComps as cc
 
 
-tie_lines = pl.read_excel(r"C:\Juan\Maestría\Code\oleosim\ExperimentalData\data\refined_lle_data_v4.xlsx", engine="calamine")
-group_contribution = pl.read_excel(r"C:\Juan\Maestría\Code\oleosim\ExperimentalData\data\group_contribution.xlsx", engine="calamine")
-comps_MW = pl.read_excel(r"C:\Juan\Maestría\Code\oleosim\ExperimentalData\data\comps_MW.xlsx", engine="calamine")
+tie_lines = pl.read_excel(r"D:\Juan\proyectos_personales\Maestría\Materias\Tesis\oleosim\ExperimentalData\data\No 47exp\refined_lle_data_v4.xlsx", engine="calamine")
+group_contribution = pl.read_excel(r"D:\Juan\proyectos_personales\Maestría\Materias\Tesis\oleosim\ExperimentalData\data\group_contribution.xlsx", engine="calamine")
+comps_MW = pl.read_excel(r"D:\Juan\proyectos_personales\Maestría\Materias\Tesis\oleosim\ExperimentalData\data\comps_MW.xlsx", engine="calamine")
 
 tie_lines = tie_lines.with_columns(
         pl.col("Sub Ref").str.slice(0, 1).alias("Sub Ref")
@@ -37,9 +37,9 @@ def main(GIP_dortmund, v, MW, T, w):
 def predict_comps():
     
     
-    tie_lines = pl.read_excel(r"D:\Juan\proyectos_personales\Maestría\Materias\Tesis\oleosim\ExperimentalData\data\refined_lle_data_v4.xlsx", engine="calamine")
+    tie_lines = pl.read_excel(r"D:\Juan\proyectos_personales\Maestría\Materias\Tesis\oleosim\ExperimentalData\data\No 47exp\refined_lle_data_v4.xlsx", engine="calamine")
     group_contribution = pl.read_excel(r"D:\Juan\proyectos_personales\Maestría\Materias\Tesis\oleosim\ExperimentalData\data\group_contribution.xlsx", engine="calamine")
-    comps_MW = pl.read_excel(r"D:\Juan\proyectos_personales\Maestría\Materias\Tesis\oleosim\ExperimentalData\data\comps_MW.xlsx", engine="calamine")
+    comps_MW = pl.read_excel(r"D:\Juan\proyectos_personales\Maestría\Materias\Tesis\oleosim\ExperimentalData\data\comps_MW.xlsx", engine="calamine") 
 
     tie_lines = tie_lines.with_columns(
         pl.col("Sub Ref").str.slice(0, 1).alias("Sub Ref")
@@ -107,6 +107,6 @@ def predict_comps_eval(params, initial_guess=None):
 if __name__ == "__main__":
    
     
-    params = np.loadtxt(r"C:\Juan\Maestría\Code\oleosim\Evaluation\Deterministic optimization\results 2 attempt\UDortmundParamsV2.out")
+    params = np.loadtxt(r"D:\Juan\proyectos_personales\Maestría\Materias\Tesis\oleosim\Evaluation\Stochastic_optimization\UDortmundDiffEvoParams.out")
     #params = np.zeros(60)
     print(predict_comps_eval(params))

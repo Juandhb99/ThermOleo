@@ -64,7 +64,7 @@ def predict_comps(params: np.ndarray, tie_lines_eval_np: np.ndarray):
     
     evaluation_log.append(log_entry)
     
-    with open("powell_log_(3-11-24).json", "w") as json_file:
+    with open("SLSQP_log_(3-11-24).json", "w") as json_file:
         json.dump(evaluation_log, json_file, indent=4 )
 
     print("Func evaluation: ", value)
@@ -74,7 +74,7 @@ if __name__ == "__main__":
     
     init_total = np.random.uniform(0, 0.5, 60)
     #bounds = [(0, 0.5)]*60
-    res = minimize(predict_comps, init_total, method = "Powell", args=(tie_lines_eval_np, ))
+    res = minimize(predict_comps, init_total, method = "SLSQP", args=(tie_lines_eval_np, ))
     #res = least_squares(fun=predict_comps, x0=init_total, args=(tie_lines_eval_np,))
     #res = differential_evolution(func = predict_comps, bounds=bounds, args=(tie_lines_eval_np,))
     print("The final value of the function is: ", res.fun)
