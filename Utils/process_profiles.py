@@ -181,6 +181,10 @@ class GroupContribution:
       of the corresponding experiment. For each experiment and 8x8 matrix will be created. The rows of the matrix correspond to the contribution of the groups CH, CH2, CH3, CH=CH, OH, CH2COO, COOH and H2O
       in that order. The columns correspond to the components FAME/FAEE, GLYCEROL, ALCOHOL, OIL, DAG, MAG, ACID, H2O. Each row, column pair represents the contribution of the row group to the
       column component calculated from the m, n, p and b parameters using the fatty acid profile.
+      
+      Attributes:
+         path_to_data (str): Path to the experimental data of the fatty acid profiles.
+         save_path (str): Path to save the new excel file with the calculated group contributions per experiment.  
    """
    
    path: str
