@@ -71,10 +71,10 @@ def predict_comps(params: np.ndarray, tie_lines_eval_np: np.ndarray):
 
 if __name__ == "__main__":
     
-    #init_total = np.random.uniform(0, 0.5, 60)
-    bounds = [(0, 0.5)]*60
-    #res = minimize(predict_comps, init_total, method = "SLSQP", args=(tie_lines_eval_np, ))
+    init_total = np.random.uniform(0, 0.5, 60)
+    #bounds = [(0, 0.5)]*60
+    res = minimize(predict_comps, init_total, method = "SLSQP", args=(tie_lines_eval_np, ))
     #res = least_squares(fun=predict_comps, x0=init_total, args=(tie_lines_eval_np,))
-    res = differential_evolution(func = predict_comps, bounds=bounds, args=(tie_lines_eval_np,))
+    #res = differential_evolution(func = predict_comps, bounds=bounds, args=(tie_lines_eval_np,))
     #res = dual_annealing(func = predict_comps, bounds=bounds, args=(tie_lines_eval_np,))
     

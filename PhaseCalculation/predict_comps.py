@@ -173,8 +173,8 @@ class CalculateComps:
             light_error = np.absolute(calculated_w_light - initial_w_light_guess)
             heavy_error = np.absolute(calculated_w_heavy - initial_w_heavy_guess) 
                         
-            if (light_error < 0.001).all() & (heavy_error < 0.001).all() or iter >= 100:
-                 
+            #if (light_error < 0.001).all() & (heavy_error < 0.001).all() or iter >= 100:
+            if iter == 50:    
                 condition_GLY = calculated_w_light[:, 1] > calculated_w_heavy[:, 1]
                 condition_OIL_1 = calculated_w_light[:, 3] > calculated_w_heavy[:, 3] 
                 condition_OIL_2 = calculated_w_light[:, 7] > calculated_w_heavy[:, 7] 
