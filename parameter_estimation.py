@@ -10,9 +10,9 @@ from UnifacDortmund import UnifacDortmund
 from PhaseCalculation import CalculateComps as cc
 
 start_time = time.time()
-tie_lines = pl.read_excel(r"C:\Juan\Maestría\Code\oleosim\ExperimentalData\data\refined_lle_data_v5.xlsx", engine="calamine")
-group_contribution = pl.read_excel(r"C:\Juan\Maestría\Code\oleosim\ExperimentalData\data\group_contribution.xlsx", engine="calamine")
-comps_MW = pl.read_excel(r"C:\Juan\Maestría\Code\oleosim\ExperimentalData\data\comps_MW.xlsx", engine="calamine")
+tie_lines = pl.read_excel(r"D:\Juan\proyectos_personales\Maestría\Materias\Tesis\oleosim\ExperimentalData\data\No 47exp\refined_lle_data_v4.xlsx", engine="calamine")
+group_contribution = pl.read_excel(r"D:\Juan\proyectos_personales\Maestría\Materias\Tesis\oleosim\ExperimentalData\data\group_contribution.xlsx", engine="calamine")
+comps_MW = pl.read_excel(r"D:\Juan\proyectos_personales\Maestría\Materias\Tesis\oleosim\ExperimentalData\data\comps_MW.xlsx", engine="calamine")
 
 tie_lines = tie_lines.with_columns(
         pl.col("Sub Ref").str.slice(0, 1).alias("Sub Ref")
@@ -64,7 +64,7 @@ def predict_comps(params: np.ndarray, tie_lines_eval_np: np.ndarray):
     
     evaluation_log.append(log_entry)
     
-    with open("differential_evolution_log_(1-11-24).json", "w") as json_file:
+    with open("powell_log_(3-11-24).json", "w") as json_file:
         json.dump(evaluation_log, json_file, indent=4 )
 
     print("Func evaluation: ", value)
@@ -72,11 +72,11 @@ def predict_comps(params: np.ndarray, tie_lines_eval_np: np.ndarray):
 
 if __name__ == "__main__":
     
-    #init_total = np.random.uniform(0, 0.5, 60)
-    bounds = [(0, 0.5)]*60
-    #res = minimize(predict_comps, init_total, method = "Nelder-Mead", args=(tie_lines_eval_np, ))
+    init_total = np.random.uniform(0, 0.5, 60)
+    #bounds = [(0, 0.5)]*60
+    res = minimize(predict_comps, init_total, method = "Powell", args=(tie_lines_eval_np, ))
     #res = least_squares(fun=predict_comps, x0=init_total, args=(tie_lines_eval_np,))
-    res = differential_evolution(func = predict_comps, bounds=bounds, args=(tie_lines_eval_np,))
+    #res = differential_evolution(func = predict_comps, bounds=bounds, args=(tie_lines_eval_np,))
     print("The final value of the function is: ", res.fun)
     end_time = time.time()
     print(f"Total time: {end_time - start_time:.2f} seconds")
