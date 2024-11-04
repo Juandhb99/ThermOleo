@@ -170,20 +170,21 @@ class CalculateComps:
             calculated_w_light = np.where(calculated_w_light < 0, 0, calculated_w_light)  
             calculated_w_heavy = np.where(calculated_w_heavy < 0, 0, calculated_w_heavy) 
             
+            condition_GLY = calculated_w_light[:, 1] > calculated_w_heavy[:, 1]
+            condition_OIL_1 = calculated_w_light[:, 3] > calculated_w_heavy[:, 3] 
+            condition_OIL_2 = calculated_w_light[:, 7] > calculated_w_heavy[:, 7] 
+            condition_OIL_3 = calculated_w_light[:, 3] > calculated_w_light[:, 7] 
+            combined_OIL_1 = condition_OIL_1 & condition_OIL_2 & condition_OIL_3
+             
+            total_condition = condition_GLY | combined_OIL_1 
+
+            calculated_w_light[total_condition], calculated_w_heavy[total_condition] = (calculated_w_heavy[total_condition], calculated_w_light[total_condition])
+
             light_error = np.absolute(calculated_w_light - initial_w_light_guess)
             heavy_error = np.absolute(calculated_w_heavy - initial_w_heavy_guess) 
                         
             if (light_error < 0.001).all() & (heavy_error < 0.001).all() or iter >= 100:
-                condition_GLY = calculated_w_light[:, 1] > calculated_w_heavy[:, 1]
-                condition_OIL_1 = calculated_w_light[:, 3] > calculated_w_heavy[:, 3] 
-                condition_OIL_2 = calculated_w_light[:, 7] > calculated_w_heavy[:, 7] 
-                condition_OIL_3 = calculated_w_light[:, 3] > calculated_w_light[:, 7] 
-                combined_OIL_1 = condition_OIL_1 & condition_OIL_2 & condition_OIL_3
-             
-                total_condition = condition_GLY | combined_OIL_1 
-
-                calculated_w_light[total_condition], calculated_w_heavy[total_condition] = (calculated_w_heavy[total_condition], calculated_w_light[total_condition])
-                
+                                
                 comp_results[:, 0:8] = calculated_w_light     
                 comp_results[:, 8:16] = calculated_w_heavy     
                 
