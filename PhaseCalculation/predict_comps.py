@@ -173,8 +173,8 @@ class CalculateComps:
             condition_GLY = calculated_w_light[:, 1] > calculated_w_heavy[:, 1]
             condition_OIL_1 = calculated_w_light[:, 3] > calculated_w_heavy[:, 3] 
             condition_OIL_2 = calculated_w_light[:, 3] > calculated_w_light[:, 7] 
-            #condition_OIL_2 = calculated_w_light[:, 7] > calculated_w_heavy[:, 7] 
-            combined_OIL_1 = condition_OIL_1 & condition_OIL_2 #& condition_OIL_3
+            condition_OIL_3 = calculated_w_light[:, 7] > calculated_w_heavy[:, 7] 
+            combined_OIL_1 = condition_OIL_1 & condition_OIL_2 & condition_OIL_3
             condition_WATER = calculated_w_light[:, 7] > calculated_w_heavy[:, 7]
 
             total_condition = condition_GLY | combined_OIL_1 | condition_WATER

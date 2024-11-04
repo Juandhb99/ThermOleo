@@ -103,6 +103,6 @@ def predict_comps_eval(params):
 
 if __name__ == "__main__":
    
-    #params = np.loadtxt(r"D:\Juan\proyectos_personales\Maestría\Materias\Tesis\oleosim\Evaluation\Stochastic_optimization\UDortmundDiffEvoParams.out")
-    params = np.zeros(60)
+    params = np.loadtxt(r"D:\Juan\proyectos_personales\Maestría\Materias\Tesis\oleosim\Evaluation\Stochastic_optimization\UDortmundDiffEvoParams.out")
+    #params = np.zeros(60)
     print(predict_comps_eval(params))
