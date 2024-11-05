@@ -6,9 +6,9 @@ from UnifacDortmund import UnifacDortmund
 from PhaseCalculation import CalculateComps as cc
 
 
-tie_lines = pl.read_excel(r"D:\Juan\proyectos_personales\Maestría\Materias\Tesis\oleosim\ExperimentalData\data\No 47exp\refined_lle_data_v5.xlsx", engine="calamine")
-group_contribution = pl.read_excel(r"D:\Juan\proyectos_personales\Maestría\Materias\Tesis\oleosim\ExperimentalData\data\group_contribution.xlsx", engine="calamine")
-comps_MW = pl.read_excel(r"D:\Juan\proyectos_personales\Maestría\Materias\Tesis\oleosim\ExperimentalData\data\comps_MW.xlsx", engine="calamine")
+tie_lines = pl.read_excel(r"C:\Juan\Maestría\Code\oleosim\ExperimentalData\data\No 47exp\refined_lle_data_v5.xlsx", engine="calamine")
+group_contribution = pl.read_excel(r"C:\Juan\Maestría\Code\oleosim\ExperimentalData\data\group_contribution.xlsx", engine="calamine")
+comps_MW = pl.read_excel(r"C:\Juan\Maestría\Code\oleosim\ExperimentalData\data\comps_MW.xlsx", engine="calamine")
 
 tie_lines = tie_lines.with_columns(
         pl.col("Sub Ref").str.slice(0, 1).alias("Sub Ref")
@@ -103,6 +103,6 @@ def predict_comps_eval(params):
 
 if __name__ == "__main__":
    
-    params = np.loadtxt(r"D:\Juan\proyectos_personales\Maestría\Materias\Tesis\oleosim\Evaluation\Stochastic_optimization\UDortmundDiffEvoParams.out")
-    #params = np.zeros(60)
+    #params = np.loadtxt(r"C:\Juan\Maestría\Code\oleosim\Evaluation\Stochastic_optimization\UDortmundDiffEvoParamsFixedPredictComps.out")
+    params = np.zeros(60)
     print(predict_comps_eval(params))
