@@ -1,5 +1,6 @@
 import os
 import time
+import pygad
 import json
 import numpy as np
 import polars as pl
@@ -69,12 +70,70 @@ def predict_comps(params: np.ndarray, tie_lines_eval_np: np.ndarray):
     print("Func evaluation: ", value)
     return value
 
-if __name__ == "__main__":
+def GA_correlation(ga_instace, solution, solution_idx):
+
+    A = solution[0:30]
+    B = solution[30:60]
+    C = solution[60:90]
     
+    GIP = cc.define_GIP(A, B, C)
+    
+    results_list = []
+    for name, data in group_tie_lines:
+        tie_lines_np = data.drop(["Ref", "Sub Ref", "Temperature (K)"]).to_numpy()
+        v = group_contribution.filter((pl.col("Ref") == name[0]) & (pl.col("Sub Ref") == name[1])).drop(["Ref", "Sub Ref"]).to_numpy()
+        experiment_MW = comps_MW.filter((pl.col("Ref") == name[0]) & (pl.col("Sub Ref") == name[1])).drop(["Ref", "Sub Ref"]).to_numpy()
+        experiment_MW.reshape(8) 
+        results_list.append(cc.calculate_comps(tie_lines_np[:,0:8], v, experiment_MW, name[2], thermo_model, GIP, initial_guess=tie_lines_np[:,8:25]))
+    
+    results_total = np.vstack(results_list) 
+    mask = tie_lines_eval_np == 0
+    results_total[mask] = 0 
+    value = root_mean_squared_error(tie_lines_eval_np, results_total)
+
+    log_entry = {
+        
+        "value": value,
+        "params": solution.tolist()
+    }    
+    
+    evaluation_log.append(log_entry)
+    
+    with open("GA_(11-11-24).json", "w") as json_file:
+        json.dump(evaluation_log, json_file, indent=4)
+
+    print("Func evaluation: ", value)
+    return -value
+
+if __name__ == "__main__":
+   
+   
+    # Deterministic 
     #init_total = np.random.uniform(0, 0.5, 60)
-    bounds = [(0, 0.5)]*60
     #res = minimize(predict_comps, init_total, method = "SLSQP", args=(tie_lines_eval_np, ))
     #res = least_squares(fun=predict_comps, x0=init_total, args=(tie_lines_eval_np,))
-    res = differential_evolution(func = predict_comps, bounds=bounds, args=(tie_lines_eval_np,))
+    
+    # Stochastic
+    #bounds = [(0, 0.5)]*60
+    #res = differential_evolution(func = predict_comps, bounds=bounds, args=(tie_lines_eval_np,))
     #res = dual_annealing(func = predict_comps, bounds=bounds, args=(tie_lines_eval_np,))
     
+    initial_population =  np.random.uniform(low=-10000, high=10000, size=(90,))
+    num_generations = 50
+    ga_instance = pygad.GA(
+    num_generations=num_generations,
+    parallel_processing = ["process", 3],
+    fitness_func= GA_correlation,
+    initial_population=initial_population,
+    gene_space={'low': -10000, 'high': 10000}  # Bounds for each parameter
+    )
+    
+    ga_instance.run()
+    ga_instance.plot_fitness()
+    solution, solution_fitness, solution_idx = ga_instance.best_solution(ga_instance.last_generation_fitness)
+    print(f"Parameters of the best solution : {solution}")
+    print(f"Fitness value of the best solution = {solution_fitness}")
+    print(f"Index of the best solution : {solution_idx}")
+    
+    filename = "genetic_machine_1"
+    ga_instance.save(filename = filename)
