@@ -120,7 +120,9 @@ if __name__ == "__main__":
     
     initial_population =  np.random.uniform(low=-10000, high=10000, size=(90,))
     num_generations = 50
+    num_paretns_mating = 20
     ga_instance = pygad.GA(
+    num_parents_mating=num_paretns_mating,
     num_generations=num_generations,
     parallel_processing = ["process", 3],
     fitness_func= GA_correlation,
