@@ -10,9 +10,9 @@ from Unifac import Unifac
 from UnifacDortmund import UnifacDortmund
 from PhaseCalculation import CalculateComps as cc
 
-tie_lines = pl.read_excel(r"C:\Juan\Maestría\Code\oleosim\ExperimentalData\data\No 47exp\refined_lle_data_v5.xlsx", engine="calamine")
-group_contribution = pl.read_excel(r"C:\Juan\Maestría\Code\oleosim\ExperimentalData\data\group_contribution.xlsx", engine="calamine")
-comps_MW = pl.read_excel(r"C:\Juan\Maestría\Code\oleosim\ExperimentalData\data\comps_MW.xlsx", engine="calamine")
+tie_lines = pl.read_excel(r"C:\Juan Hoyos\code\ThermOleo\ExperimentalData\data\No 47exp\refined_lle_data_v5.xlsx", engine="calamine")
+group_contribution = pl.read_excel(r"C:\Juan Hoyos\code\ThermOleo\ExperimentalData\data\group_contribution.xlsx", engine="calamine")
+comps_MW = pl.read_excel(r"C:\Juan Hoyos\code\ThermOleo\ExperimentalData\data\comps_MW.xlsx", engine="calamine")
 
 tie_lines = tie_lines.with_columns(
         pl.col("Sub Ref").str.slice(0, 1).alias("Sub Ref")
