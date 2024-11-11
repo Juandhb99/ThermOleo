@@ -73,7 +73,6 @@ def predict_comps(params: np.ndarray, tie_lines_eval_np: np.ndarray):
 def GA_correlation(ga_instace, solution, solution_idx):
     
     
-    solution = solution.reshape(90,)
     A = solution[0:30]
     B = solution[30:60]
     C = solution[60:90]
@@ -120,15 +119,17 @@ if __name__ == "__main__":
     #res = differential_evolution(func = predict_comps, bounds=bounds, args=(tie_lines_eval_np,))
     #res = dual_annealing(func = predict_comps, bounds=bounds, args=(tie_lines_eval_np,))
     
-    initial_population =  np.random.uniform(low=-10000, high=10000, size=(90, 1))
     num_generations = 50
+    sol_per_pop = 40
+    num_genes = 90
     num_paretns_mating = 20
     ga_instance = pygad.GA(
+    num_genes=num_genes,
+    sol_per_pop=sol_per_pop,
     num_parents_mating=num_paretns_mating,
     num_generations=num_generations,
     parallel_processing = ["process", 3],
     fitness_func= GA_correlation,
-    initial_population=initial_population,
     gene_space={'low': -10000, 'high': 10000}  # Bounds for each parameter
     )
     
