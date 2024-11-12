@@ -4,7 +4,7 @@ import pygad
 import json
 import numpy as np
 import polars as pl
-from sklearn.metrics import root_mean_squared_error
+from sklearn.metrics import root_mean_squared_error, r2_score
 from scipy.optimize import  minimize, least_squares, differential_evolution, dual_annealing
 from Unifac import Unifac
 from UnifacDortmund import UnifacDortmund
@@ -90,21 +90,11 @@ def GA_correlation(ga_instace, solution, solution_idx):
     results_total = np.vstack(results_list) 
     mask = tie_lines_eval_np == 0
     results_total[mask] = 0 
-    value = root_mean_squared_error(tie_lines_eval_np, results_total)
+    RMSE = root_mean_squared_error(tie_lines_eval_np, results_total)
+    R2 = r2_score(tie_lines_eval_np, results_total)
 
-    log_entry = {
-        
-        "value": value,
-        "params": solution.tolist()
-    }    
-    
-    evaluation_log.append(log_entry)
-    
-    with open("GA_(11-11-24).json", "w") as json_file:
-        json.dump(evaluation_log, json_file, indent=4)
-
-    print("Func evaluation: ", value)
-    return 1 - value
+    print("RMSE: ", RMSE, "R2: ", R2)
+    return [1 - RMSE, R2]
 
 if __name__ == "__main__":
    
@@ -134,11 +124,11 @@ if __name__ == "__main__":
     )
     
     ga_instance.run()
-    ga_instance.plot_fitness()
+    ga_instance.plot_fitness(label=['Obj 1', 'Obj 2'])
     solution, solution_fitness, solution_idx = ga_instance.best_solution(ga_instance.last_generation_fitness)
     print(f"Parameters of the best solution : {solution}")
     print(f"Fitness value of the best solution = {solution_fitness}")
     print(f"Index of the best solution : {solution_idx}")
     
-    filename = "genetic_machine_1"
+    filename = "genetic_machine_1_run2"
     ga_instance.save(filename = filename)
