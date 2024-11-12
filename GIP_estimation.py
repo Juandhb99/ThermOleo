@@ -130,7 +130,7 @@ if __name__ == "__main__":
     num_generations=num_generations,
     parallel_processing = ["process", 3],
     fitness_func= GA_correlation,
-    gene_space={'low': -50, 'high': 50}  # Bounds for each parameter
+    gene_space={'low': -2, 'high': 2}  # Bounds for each parameter
     )
     
     ga_instance.run()
