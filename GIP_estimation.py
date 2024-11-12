@@ -104,7 +104,7 @@ def GA_correlation(ga_instace, solution, solution_idx):
         json.dump(evaluation_log, json_file, indent=4)
 
     print("Func evaluation: ", value)
-    return -value
+    return 1 - value
 
 if __name__ == "__main__":
    
