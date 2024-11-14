@@ -124,11 +124,11 @@ if __name__ == "__main__":
     )
     
     ga_instance.run()
+    filename = "genetic_machine_1_MO_run1"
+    ga_instance.save(filename = filename)
     ga_instance.plot_fitness(label=['Obj 1', 'Obj 2'])
     solution, solution_fitness, solution_idx = ga_instance.best_solution(ga_instance.last_generation_fitness)
     print(f"Parameters of the best solution : {solution}")
     print(f"Fitness value of the best solution = {solution_fitness}")
     print(f"Index of the best solution : {solution_idx}")
     
-    filename = "genetic_machine_1_run2"
-    ga_instance.save(filename = filename)
