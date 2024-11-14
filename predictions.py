@@ -78,11 +78,15 @@ def predict_comps():
     
 def predict_comps_eval(params):
 
-    A = np.array([-3214.25, -1718.09, -3079.37, 1295.55, 1249.74, 2900.56, 2900.56, 2900.56, -388.62, 259.13, 4925.67, 4925.67, 4925.67, 1047.08, -2424.84, 
-                  2544.80, 2544.80, 2544.80, 258.51, -3227.03, 3714.86, 3714.86, 3714.86, -987.18, -688.85, 20930.91, 5084.03, -1210.44, -4618.51, -14448.32]) 
+    #A = np.array([-3214.25, -1718.09, -3079.37, 1295.55, 1249.74, 2900.56, 2900.56, 2900.56, -388.62, 259.13, 4925.67, 4925.67, 4925.67, 1047.08, -2424.84, 
+                  #2544.80, 2544.80, 2544.80, 258.51, -3227.03, 3714.86, 3714.86, 3714.86, -987.18, -688.85, 20930.91, 5084.03, -1210.44, -4618.51, -14448.32]) 
     
-    B = params[0:30]
-    C = params[30:60]
+    #B = params[0:30]
+    #C = params[30:60]
+    
+    A = params[0:30]
+    B = params[30:60]
+    C = params[60:90]
     
     GIP = cc.define_GIP(A, B, C)
     
@@ -103,6 +107,6 @@ def predict_comps_eval(params):
 
 if __name__ == "__main__":
    
-    #params = np.loadtxt(r"C:\Juan\Maestría\Code\oleosim\Evaluation\Stochastic_optimization\UDortmundDiffEvoParamsFixedPredictComps.out")
-    params = np.zeros(60)
+    params = np.loadtxt(r"C:\Juan\Maestría\Code\oleosim\Evaluation\Stochastic_optimization\GA\UDortmundParamsGARun1.out")
+    #params = np.zeros(60)
     print(predict_comps_eval(params))
