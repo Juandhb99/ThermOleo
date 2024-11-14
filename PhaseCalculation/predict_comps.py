@@ -196,6 +196,86 @@ class CalculateComps:
                 initial_w_heavy_guess = calculated_w_heavy 
              
         return comp_results
+    
+    
+    @staticmethod
+    def calculate_comps_one_step(data: np.ndarray, v: np.ndarray, data_MW: np.ndarray, temperature: float, thermo_model, GIP: np.ndarray, initial_guess: np.ndarray = None) -> np.ndarray:
+        """The calculate_comps_one_step method, calculates the component mass fraction in each of the phases following without applying the convergence algorithm
+
+        Args:
+            data (np.ndarray): Global/feed compositions.
+            v (np.ndarray):  Matrix of the number of times each group appears in each molecule of the mixture. This is a 8x8 matrix 
+            data_MW (np.ndarray): Vector of molecular weights of the molecules in the system. This is a 1x8 vector that must have the following order
+            FAME/FAEE, GLYCEROL, ALCOHOL, OIL, DAG, MAG, ACID, H2O.
+            temperature (float): Temperature of the system in K.
+            thermo_model (Unifac/UnifacDortmund): Thermodynamic model to use, either UNIFAC or UNIFAC Dortmund.
+            GIP (np.ndarray): Matrix of group interaction parameters, this must be a 8x8x3 matrix where each column and row represents a
+            functional group. The order must be CH, CH2, CH3, CH=CH, OH, CH2COO, COOH, H2O for both the columns and rows. The a, b and c GIP for the 
+            unifac dortmund model are respectively must be the first, second and third layer of the GIP matrix. 
+            initial_guesss(np.ndarray): Matrix of initial guesses for the compositions of each component in each phase in the mixture and the light phase mass fraction. This is a 
+            matrix of size nx17 where n is the number of tie lines, the first 16 columns are the compositions in each phase (8 in the light and 8 in the heavy) and the last column
+            is the mass fraction.
+
+        Returns:
+            np.ndarray: Component mass fraction in each phase. This will be two matrices of time 
+        """       
+        comp_results = np.zeros((data.shape[0], 16)) 
+        phase_distribution = thermo_model(GIP, v, data_MW, temperature)
+        mask_light = data == 0
+        mask_heavy = data == 0 
+        
+        if initial_guess is not None:
+             
+            initial_w_light_guess = initial_guess[:,0:8]
+            initial_w_heavy_guess = initial_guess[:,8:16] 
+            phi_guess = (1 - initial_guess[:,-1])
+        
+        else: 
+            
+            initial_w_light_guess = np.random.random((data.shape[0], 8))
+            initial_w_heavy_guess = np.random.random((data.shape[0], 8))
+            initial_w_light_guess[mask_light] = 0
+            initial_w_heavy_guess[mask_heavy] = 0
+            initial_w_light_guess = initial_w_light_guess/initial_w_light_guess.sum(axis = 1, keepdims=True)
+            initial_w_heavy_guess = initial_w_heavy_guess/initial_w_heavy_guess.sum(axis = 1, keepdims=True)
+            phi_guess = np.full((data.shape[0], ), 0.5)
+              
+            
+        gamma_light = np.apply_along_axis(phase_distribution.calculate_gamma, 1, initial_w_light_guess).reshape(data.shape[0], 8) 
+        gamma_heavy = np.apply_along_axis(phase_distribution.calculate_gamma, 1, initial_w_heavy_guess).reshape(data.shape[0], 8)     
+        gamma_light[mask_light] = 1
+        gamma_heavy[mask_heavy] = 1  
+        gamma_light = np.where(gamma_light == 0, 1e-20, gamma_light) 
+        gamma_heavy = np.where(gamma_heavy == 0, 1e-20, gamma_heavy) 
+        Ki = np.clip(gamma_light / gamma_heavy, 1e-6, 1e6)
+        try: 
+            sol = minimize(CalculateComps.rachford_rice, x0=phi_guess,  args=(data, Ki, data.shape[0]), bounds=[(0, 1)], tol = 1e-6)
+                
+        except RuntimeError:
+            print("RuntimeError Encountered in minimize")
+                
+        sol = sol.x.reshape(data.shape[0], 1)     
+        calculated_w_light = data / (1 + (Ki - 1) * sol)
+        calculated_w_heavy = Ki * calculated_w_light
+            
+        #calculated_w_light = np.where(calculated_w_light >= 1, 0.999, calculated_w_light)  
+        #calculated_w_heavy = np.where(calculated_w_heavy >= 1, 0.999, calculated_w_heavy) 
+        #calculated_w_light = np.where(calculated_w_light < 0, 0, calculated_w_light)  
+        #calculated_w_heavy = np.where(calculated_w_heavy < 0, 0, calculated_w_heavy) 
+            
+        condition_GLY = calculated_w_light[:, 1] > calculated_w_heavy[:, 1]
+        condition_OIL_1 = calculated_w_light[:, 3] > calculated_w_heavy[:, 3] 
+        condition_OIL_2 = calculated_w_light[:, 3] > calculated_w_light[:, 7] 
+        condition_OIL_3 = calculated_w_light[:, 7] > calculated_w_heavy[:, 7] 
+        combined_OIL_1 = condition_OIL_1 & condition_OIL_2 & condition_OIL_3
+        condition_WATER = calculated_w_light[:, 7] > calculated_w_heavy[:, 7]
+
+        total_condition = condition_GLY | combined_OIL_1 | condition_WATER
+
+        #calculated_w_light[total_condition], calculated_w_heavy[total_condition] = (calculated_w_heavy[total_condition], calculated_w_light[total_condition])
+        comp_results[:, 0:8] = calculated_w_light     
+        comp_results[:, 8:16] = calculated_w_heavy 
+        return comp_results 
 
         
     
