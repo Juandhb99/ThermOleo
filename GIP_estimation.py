@@ -92,17 +92,6 @@ def GA_correlation(ga_instace, solution, solution_idx):
     results_total[mask] = 0 
     value = root_mean_squared_error(tie_lines_eval_np, results_total)
 
-    log_entry = {
-        
-        "value": value,
-        "params": solution.tolist()
-    }    
-    
-    evaluation_log.append(log_entry)
-    
-    with open("GA_(11-11-24).json", "w") as json_file:
-        json.dump(evaluation_log, json_file, indent=4)
-
     print("Func evaluation: ", value)
     return 1 - value
 
@@ -120,21 +109,21 @@ if __name__ == "__main__":
     #res = dual_annealing(func = predict_comps, bounds=bounds, args=(tie_lines_eval_np,))
     
     num_generations = 50
-    sol_per_pop = 40
+    sol_per_pop = 100
     num_genes = 90
-    num_paretns_mating = 20
+    num_paretns_mating = 50
     ga_instance = pygad.GA(
     num_genes=num_genes,
     sol_per_pop=sol_per_pop,
     num_parents_mating=num_paretns_mating,
     num_generations=num_generations,
-    parallel_processing = ["process", 3],
+    parallel_processing = ["process", 8],
     fitness_func= GA_correlation,
-    gene_space={'low': -1, 'high': 1}  # Bounds for each parameter
+    gene_space={'low': -2, 'high': 2}  # Bounds for each parameter
     )
     
     ga_instance.run()
-    filename = "genetic_machine_2"
+    filename = "genetic_machine_2_run_2"
     ga_instance.save(filename = filename)
     ga_instance.plot_fitness()
     solution, solution_fitness, solution_idx = ga_instance.best_solution(ga_instance.last_generation_fitness)
