@@ -82,23 +82,12 @@ def GA_correlation(ga_instace, solution, solution_idx):
         v = group_contribution.filter((pl.col("Ref") == name[0]) & (pl.col("Sub Ref") == name[1])).drop(["Ref", "Sub Ref"]).to_numpy()
         experiment_MW = comps_MW.filter((pl.col("Ref") == name[0]) & (pl.col("Sub Ref") == name[1])).drop(["Ref", "Sub Ref"]).to_numpy()
         experiment_MW.reshape(8) 
-        results_list.append(cc.calculate_comps(tie_lines_np[:,0:8], v, experiment_MW, name[2], thermo_model, GIP, initial_guess=tie_lines_np[:,8:25]))
+        results_list.append(cc.calculate_comps_one_step(tie_lines_np[:,0:8], v, experiment_MW, name[2], thermo_model, GIP, initial_guess=tie_lines_np[:,8:25]))
     
     results_total = np.vstack(results_list) 
     mask = tie_lines_eval_np == 0
     results_total[mask] = 0 
     value = root_mean_squared_error(tie_lines_eval_np, results_total)
-
-    log_entry = {
-        
-        "value": value,
-        "params": solution.tolist()
-    }    
-    
-    evaluation_log.append(log_entry)
-    
-    with open("SLSQP_(14-11-24).json", "w") as json_file:
-        json.dump(evaluation_log, json_file, indent=4)
 
     print("Func evaluation: ", value)
     return 1 - value
@@ -107,10 +96,10 @@ if __name__ == "__main__":
    
    
     # Deterministic 
-    init_total = np.random.uniform(0, 0.5, 60)
-    res = minimize(predict_comps, init_total, method = "SLSQP", args=(tie_lines_eval_np, ))
-    print(init_total)
-    print(res)
+    #init_total = np.random.uniform(0, 0.5, 60)
+    #res = minimize(predict_comps, init_total, method = "SLSQP", args=(tie_lines_eval_np, ))
+    #print(init_total)
+    #print(res)
     #res = least_squares(fun=predict_comps, x0=init_total, args=(tie_lines_eval_np,))
     
     # Stochastic
@@ -118,24 +107,26 @@ if __name__ == "__main__":
     #res = differential_evolution(func = predict_comps, bounds=bounds, args=(tie_lines_eval_np,))
     #res = dual_annealing(func = predict_comps, bounds=bounds, args=(tie_lines_eval_np,))
 
-    #num_generations = 50
-    #sol_per_pop = 40
-    #num_genes = 90
-    #num_parents_mating = 20
-    #ga_instance = pygad.GA(
-    #num_genes=num_genes,
-    #sol_per_pop=sol_per_pop,
-    #num_parents_mating=num_parents_mating, 
-    #num_generations=num_generations,
-    #fitness_func= GA_correlation,
-    #gene_space={'low': -10000, 'high': 10000}  # Bounds for each parameter
+    num_generations = 50
+    sol_per_pop = 100
+    num_genes = 90
+    num_paretns_mating = 50
+    ga_instance = pygad.GA(
+    num_genes=num_genes,
+    sol_per_pop=sol_per_pop,
+    num_parents_mating=num_paretns_mating,
+    num_generations=num_generations,
+    parallel_processing = ["process", 16],
+    fitness_func= GA_correlation,
+    gene_space={'low': -2, 'high': 2}  # Bounds for each parameter
+    )
     
-    #ga_instance.run()
-    #ga_instance.plot_fitness()
-    #solution, solution_fitness, solution_idx = ga_instance.best_solution(ga_instance.last_generation_fitness)
-    #print(f"Parameters of the best solution : {solution}")
-    #print(f"Fitness value of the best solution = {solution_fitness}")
-    #print(f"Index of the best solution : {solution_idx}")
+    ga_instance.run()
+    filename = "genetic_machine_local_no_iter_run1"
+    ga_instance.save(filename = filename)
+    ga_instance.plot_fitness()
+    solution, solution_fitness, solution_idx = ga_instance.best_solution(ga_instance.last_generation_fitness)
+    print(f"Parameters of the best solution : {solution}")
+    print(f"Fitness value of the best solution = {solution_fitness}")
+    print(f"Index of the best solution : {solution_idx}")
     
-    #filename = "genetic"
-    #ga_instance.save(filename = filename)
