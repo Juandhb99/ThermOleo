@@ -107,7 +107,7 @@ if __name__ == "__main__":
     #res = differential_evolution(func = predict_comps, bounds=bounds, args=(tie_lines_eval_np,))
     #res = dual_annealing(func = predict_comps, bounds=bounds, args=(tie_lines_eval_np,))
 
-    num_generations = 50
+    num_generations = 100
     sol_per_pop = 100
     num_genes = 90
     num_paretns_mating = 50
@@ -122,7 +122,7 @@ if __name__ == "__main__":
     )
     
     ga_instance.run()
-    filename = "genetic_machine_local_no_iter_run1"
+    filename = "genetic_machine_local_no_iter_run2"
     ga_instance.save(filename = filename)
     ga_instance.plot_fitness()
     solution, solution_fitness, solution_idx = ga_instance.best_solution(ga_instance.last_generation_fitness)
