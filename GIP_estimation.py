@@ -109,7 +109,7 @@ if __name__ == "__main__":
     #res = differential_evolution(func = predict_comps, bounds=bounds, args=(tie_lines_eval_np,))
     #res = dual_annealing(func = predict_comps, bounds=bounds, args=(tie_lines_eval_np,))
     
-    num_generations = 50
+    num_generations = 150
     sol_per_pop = 100
     num_genes = 90
     num_paretns_mating = 50
