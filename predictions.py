@@ -107,6 +107,6 @@ def predict_comps_eval(params):
 
 if __name__ == "__main__":
    
-    params = np.loadtxt(r"C:\Juan\Maestría\Code\oleosim\Evaluation\Stochastic_optimization\GA\UDortmundParamsGANoIter.out")
+    params = np.loadtxt(r"C:\Juan\Maestría\Code\oleosim\Evaluation\Stochastic_optimization\GA\UDortmundParamsM2GANoIter.out")
     #params = np.zeros(60)
     print(predict_comps_eval(params))
