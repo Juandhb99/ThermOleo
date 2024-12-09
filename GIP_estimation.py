@@ -108,10 +108,10 @@ if __name__ == "__main__":
     #res = differential_evolution(func = predict_comps, bounds=bounds, args=(tie_lines_eval_np,))
     #res = dual_annealing(func = predict_comps, bounds=bounds, args=(tie_lines_eval_np,))
     
-    num_generations = 50
-    sol_per_pop = 100
+    num_generations = 300
+    sol_per_pop = 150
     num_genes = 90
-    num_paretns_mating = 50
+    num_paretns_mating = 100 # 70
     ga_instance = pygad.GA(
     num_genes=num_genes,
     sol_per_pop=sol_per_pop,

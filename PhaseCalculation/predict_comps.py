@@ -165,10 +165,10 @@ class CalculateComps:
             calculated_w_light = data / (1 + (Ki - 1) * sol)
             calculated_w_heavy = Ki * calculated_w_light
             
-            #calculated_w_light = np.where(calculated_w_light >= 1, 0.999, calculated_w_light)  
-            #calculated_w_heavy = np.where(calculated_w_heavy >= 1, 0.999, calculated_w_heavy) 
-            #calculated_w_light = np.where(calculated_w_light < 0, 0, calculated_w_light)  
-            #calculated_w_heavy = np.where(calculated_w_heavy < 0, 0, calculated_w_heavy) 
+            calculated_w_light = np.where(calculated_w_light >= 1, 0.999, calculated_w_light)  
+            calculated_w_heavy = np.where(calculated_w_heavy >= 1, 0.999, calculated_w_heavy) 
+            calculated_w_light = np.where(calculated_w_light < 0, 0, calculated_w_light)  
+            calculated_w_heavy = np.where(calculated_w_heavy < 0, 0, calculated_w_heavy) 
             
             condition_GLY = calculated_w_light[:, 1] > calculated_w_heavy[:, 1]
             condition_OIL_1 = calculated_w_light[:, 3] > calculated_w_heavy[:, 3] 
