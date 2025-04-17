@@ -69,7 +69,7 @@ references = {
             'Canola Oil'],
     
     '16a': ['Liquid–liquid equilibria for mixtures containing water, methanol, fatty acid methyl esters, and glycerol Ming-Jer Lee?, Yuan-Chen Lo, Ho-Mu Lin',
-            'Oelic Oil'],
+            'Oleic Oil'],
     
     '17a': ['Liquid-Liquid Equilibrium Study in Ternary Castor Oil Biodiesel þ Ethanol þ Glycerol and Quaternary Castor Oil Biodiesel þ Ethanol þ Glycerol þ NaOH Systems at (298.2 and 333.2) K Alex Barreto Machado,† Yurany Camacho Ardila, Leonardo Hadlich de Oliveira, Martín Aznar, and Maria Regina Wolf Maciel*',
             'Castor Oil'],
