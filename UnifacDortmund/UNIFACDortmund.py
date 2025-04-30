@@ -43,7 +43,8 @@ class UnifacDortmund:
         """Calculate the combinatorial contribution of the UNIFAC model.
 
         Args:
-            w (np.ndarray): Mass fraction compositions.
+            w (np.ndarray): Mass fraction compositions. This must be a nx8 np.array with the following order
+            FAME/FAEE, GLYCEROL, ALCOHOL, OIL, DAG, MAG, ACID, H2O.
 
         Returns:
             np.ndarray: Vector of combinatorial contributions per component.
@@ -61,7 +62,8 @@ class UnifacDortmund:
         """Calculate the residual contribution of the UNIFAC model.
 
         Args:
-            w (np.ndarray): Mass fraction compositions.
+            w (np.ndarray): Mass fraction compositions. This must be a nx8 np.array with the following order
+            FAME/FAEE, GLYCEROL, ALCOHOL, OIL, DAG, MAG, ACID, H2O.
 
         Returns:
             np.ndarray: Vector of combinatorial contributions per component.
@@ -86,7 +88,8 @@ class UnifacDortmund:
         """Calculate gamma activity coefficient from the sum of the combinatorial and residual contribution.
 
         Args:
-            w (np.ndarray): Mass fraction compositions.
+            w (np.ndarray): Mass fraction compositions. This must be a nx8 np.array with the following order
+            FAME/FAEE, GLYCEROL, ALCOHOL, OIL, DAG, MAG, ACID, H2O.
 
         Returns:
             np.ndarray: Vector of activity coefficients per component.
