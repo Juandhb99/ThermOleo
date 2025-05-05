@@ -142,7 +142,7 @@ class CalculateComps:
             phi_guess = np.full((data.shape[0], ), 0.5)
               
         iter = 0
-        #relaxation_factor = 0.8 
+        relaxation_factor = 0.8 
         
         while True:
             
@@ -192,8 +192,10 @@ class CalculateComps:
                 break
             
             else:
-                initial_w_light_guess = calculated_w_light
-                initial_w_heavy_guess = calculated_w_heavy 
+                #initial_w_light_guess = calculated_w_light
+                #initial_w_heavy_guess = calculated_w_heavy 
+                initial_w_light_guess = initial_w_light_guess + relaxation_factor * (calculated_w_light - initial_w_light_guess)
+                initial_w_heavy_guess = initial_w_heavy_guess + relaxation_factor * (calculated_w_heavy - initial_w_heavy_guess) 
              
         return comp_results
     
