@@ -23,9 +23,9 @@ tie_lines_validate = tie_lines_validate.drop(["index"])
 group_contribution = group_contribution.drop(["MAG/DAG Profile?", "Additional FAME Profile?", "Acid mix Profile?", "Type Alcohol"])
 comps_MW = comps_MW.drop(["Type Alcohol"])
 tie_lines = tie_lines.drop(["index"])
-group_tie_lines = tie_lines_train.group_by(["Ref", "Sub Ref", "Temperature (K)"], maintain_order=True)     
+group_tie_lines = tie_lines.group_by(["Ref", "Sub Ref", "Temperature (K)"], maintain_order=True)     
 
-tie_lines_eval = tie_lines_train.select(['FAME/FAEE_L', 'GLYCEROL_L', 'ALCOHOL_L', 'OIL_L', 'DAG_L', 'MAG_L', 'ACID_L', 'WATER_L', 'FAME/FAEE_H', 'GLYCEROL_H', 'ALCOHOL_H', 'OIL_H', 'DAG_H', 'MAG_H', 'ACID_H', 'WATER_H'])
+tie_lines_eval = tie_lines.select(['FAME/FAEE_L', 'GLYCEROL_L', 'ALCOHOL_L', 'OIL_L', 'DAG_L', 'MAG_L', 'ACID_L', 'WATER_L', 'FAME/FAEE_H', 'GLYCEROL_H', 'ALCOHOL_H', 'OIL_H', 'DAG_H', 'MAG_H', 'ACID_H', 'WATER_H'])
 tie_lines_eval_np = tie_lines_eval.to_numpy()    
 thermo_model = UnifacDortmund
 
@@ -102,8 +102,8 @@ def predict_comps_eval(params):
     mask = tie_lines_eval_np == 0
     results_total[mask] = 0 
     
-    #pl.DataFrame(results_total, schema=['FAME/FAEE_L', 'GLYCEROL_L', 'ALCOHOL_L', 'OIL_L', 'DAG_L', 'MAG_L', 'ACID_L', 'WATER_L', 'FAME/FAEE_H', 'GLYCEROL_H', 'ALCOHOL_H', 'OIL_H', 'DAG_H', 'MAG_H', 'ACID_H', 'WATER_H']).write_excel("results_predict_validate.xlsx") 
-    pl.DataFrame(tie_lines_eval_np, schema=['FAME/FAEE_L', 'GLYCEROL_L', 'ALCOHOL_L', 'OIL_L', 'DAG_L', 'MAG_L', 'ACID_L', 'WATER_L', 'FAME/FAEE_H', 'GLYCEROL_H', 'ALCOHOL_H', 'OIL_H', 'DAG_H', 'MAG_H', 'ACID_H', 'WATER_H']).write_excel("train_data.xlsx") 
+    pl.DataFrame(results_total, schema=['FAME/FAEE_L', 'GLYCEROL_L', 'ALCOHOL_L', 'OIL_L', 'DAG_L', 'MAG_L', 'ACID_L', 'WATER_L', 'FAME/FAEE_H', 'GLYCEROL_H', 'ALCOHOL_H', 'OIL_H', 'DAG_H', 'MAG_H', 'ACID_H', 'WATER_H']).write_excel("results_total_data_damping.xlsx") 
+    #pl.DataFrame(tie_lines_eval_np, schema=['FAME/FAEE_L', 'GLYCEROL_L', 'ALCOHOL_L', 'OIL_L', 'DAG_L', 'MAG_L', 'ACID_L', 'WATER_L', 'FAME/FAEE_H', 'GLYCEROL_H', 'ALCOHOL_H', 'OIL_H', 'DAG_H', 'MAG_H', 'ACID_H', 'WATER_H']).write_excel("total_data_damping.xlsx") 
     return root_mean_squared_error(tie_lines_eval_np, results_total)
 
 if __name__ == "__main__":

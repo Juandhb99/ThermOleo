@@ -142,7 +142,7 @@ class CalculateComps:
             phi_guess = np.full((data.shape[0], ), 0.5)
               
         iter = 0
-        relaxation_factor = 0.8 
+        relaxation_factor = 0.63
         
         while True:
             
