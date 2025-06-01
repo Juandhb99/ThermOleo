@@ -161,7 +161,8 @@ class ExperimentalValidation:
         Returns:
             pl.DataFrame: Raw_data with added columns that have the calculated experimental phi.
         """        
-        raw_data, additional_columns = self._preprocess_data() 
+        raw_data, additional_columns = self._load_data() 
+        raw_data = self._preprocess_data(raw_data=raw_data) 
         experimental_phi = self._calculate_experimental_phi(raw_data=raw_data) 
         phi_data = raw_data.join(experimental_phi, on="index")  
         return additional_columns.join(phi_data, on="index")
