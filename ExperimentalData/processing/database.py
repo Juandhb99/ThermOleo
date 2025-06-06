@@ -20,10 +20,10 @@ references = {
     '3a': ['Liquid–liquid equilibrium of pseudoternary systems containing glycerol + ethanol + ethylic biodiesel from crambe oil (Crambe abyssinica) at T/K = (298.2, 318.2, 338.2) and thermodynamic modeling Rodrigo Corrêa Basso?, Antonio José de Almeida Meirelles, Eduardo Augusto Caldas Batista', 
            'Crambe Oil'],
    
-    '4a': ['Liquid–Liquid Equilibria in Biodiesel Production Sunflower Masoume Rostami • Sona Raeissi • Maziyar Mahmoodi • Masoud Nowroozi',
+    '4a': ['Liquid–Liquid Equilibria in Biodiesel Production Masoume Rostami • Sona Raeissi • Maziyar Mahmoodi • Masoud Nowroozi',
            'Sunflower Oil'],
     
-    '5a': ['Liquid–Liquid Equilibria in Biodiesel Production Canola Masoume Rostami • Sona Raeissi • Maziyar Mahmoodi • Masoud Nowroozi', 
+    '5a': ['Liquid–Liquid Equilibria in Biodiesel Production Masoume Rostami • Sona Raeissi • Maziyar Mahmoodi • Masoud Nowroozi', 
            'Canola Oil'], 
     
     '6a': ['Liquid–Liquid Equilibrium for Systems of (Fatty Acid Ethyl Esters + Ethanol + Soybean Oil and Fatty Acid Ethyl Esters + Ethanol + Glycerol) Xuejun Liu, Xianglan Piao, Yujun Wang,* and Shenlin Zhu',
