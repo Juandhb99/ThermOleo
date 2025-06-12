@@ -1,3 +1,4 @@
+import pickle
 import numpy as np
 import polars as pl
 from Unifac import Unifac
@@ -91,19 +92,27 @@ def predict_comps_eval(params):
     GIP = cc.define_GIP(A, B, C)
     
     results_list = []
+    error_list = []
+    analysis_dict = {}
     for name, data in group_tie_lines:
+        print(name)
         tie_lines_np = data.drop(["Ref", "Sub Ref", "Temperature (K)"]).to_numpy()
         v = group_contribution.filter((pl.col("Ref") == name[0]) & (pl.col("Sub Ref") == name[1])).drop(["Ref", "Sub Ref"]).to_numpy()
         experiment_MW = comps_MW.filter((pl.col("Ref") == name[0]) & (pl.col("Sub Ref") == name[1])).drop(["Ref", "Sub Ref"]).to_numpy()
         experiment_MW.reshape(8) 
-        results_list.append(cc.calculate_comps(tie_lines_np[:,0:8], v, experiment_MW, name[2], thermo_model, GIP, initial_guess=tie_lines_np[:,8:25])) #tie_lines_np[:,8:25]
+        comp_results, error_list = cc.calculate_comps(tie_lines_np[:,0:8], v, experiment_MW, name[2], thermo_model, GIP, initial_guess=tie_lines_np[:,8:25])  
+        analysis_dict.update({name:error_list})
+        results_list.append(comp_results) #tie_lines_np[:,8:25]
     
     results_total = np.vstack(results_list) 
     mask = tie_lines_eval_np == 0
     results_total[mask] = 0 
     
-    pl.DataFrame(results_total, schema=['FAME/FAEE_L', 'GLYCEROL_L', 'ALCOHOL_L', 'OIL_L', 'DAG_L', 'MAG_L', 'ACID_L', 'WATER_L', 'FAME/FAEE_H', 'GLYCEROL_H', 'ALCOHOL_H', 'OIL_H', 'DAG_H', 'MAG_H', 'ACID_H', 'WATER_H']).write_excel("results_total_data_damping.xlsx") 
+    #pl.DataFrame(results_total, schema=['FAME/FAEE_L', 'GLYCEROL_L', 'ALCOHOL_L', 'OIL_L', 'DAG_L', 'MAG_L', 'ACID_L', 'WATER_L', 'FAME/FAEE_H', 'GLYCEROL_H', 'ALCOHOL_H', 'OIL_H', 'DAG_H', 'MAG_H', 'ACID_H', 'WATER_H']).write_excel("results_total_data_damping.xlsx") 
     #pl.DataFrame(tie_lines_eval_np, schema=['FAME/FAEE_L', 'GLYCEROL_L', 'ALCOHOL_L', 'OIL_L', 'DAG_L', 'MAG_L', 'ACID_L', 'WATER_L', 'FAME/FAEE_H', 'GLYCEROL_H', 'ALCOHOL_H', 'OIL_H', 'DAG_H', 'MAG_H', 'ACID_H', 'WATER_H']).write_excel("total_data_damping.xlsx") 
+    with open('analysis_dict.pkl', 'wb') as f:
+        pickle.dump(analysis_dict, f)
+
     return root_mean_squared_error(tie_lines_eval_np, results_total)
 
 if __name__ == "__main__":

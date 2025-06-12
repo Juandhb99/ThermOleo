@@ -143,7 +143,7 @@ class CalculateComps:
               
         iter = 0
         relaxation_factor = 0.63
-        
+        error_list =[] 
         while True:
             
             iter += 1
@@ -183,9 +183,10 @@ class CalculateComps:
 
             light_error = np.absolute(calculated_w_light - initial_w_light_guess)
             heavy_error = np.absolute(calculated_w_heavy - initial_w_heavy_guess) 
-                        
+            error_list.append(np.sum(light_error) + np.sum(heavy_error))            
+                
             if (light_error < 0.001).all() & (heavy_error < 0.001).all() or iter >= 100:
-                                
+                print(iter)                 
                 comp_results[:, 0:8] = calculated_w_light     
                 comp_results[:, 8:16] = calculated_w_heavy     
                 
@@ -197,7 +198,7 @@ class CalculateComps:
                 initial_w_light_guess = initial_w_light_guess + relaxation_factor * (calculated_w_light - initial_w_light_guess)
                 initial_w_heavy_guess = initial_w_heavy_guess + relaxation_factor * (calculated_w_heavy - initial_w_heavy_guess) 
              
-        return comp_results
+        return comp_results, error_list
     
     
     @staticmethod
