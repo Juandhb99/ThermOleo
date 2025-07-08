@@ -98,7 +98,7 @@ class CalculateComps:
         return GIP
     
     @staticmethod
-    def calculate_comps(data: np.ndarray, v: np.ndarray, data_MW: np.ndarray, temperature: float, thermo_model, GIP: np.ndarray, initial_guess: np.ndarray = None) -> np.ndarray:
+    def calculate_comps(data: np.ndarray, v: np.ndarray, data_MW: np.ndarray, temperature: float, thermo_model, GIP: np.ndarray, initial_guess: np.ndarray = None) -> np.ndarray: # type: ignore
         """The calculate_comps method, calculates the component mass fraction in each of the phases following the procedure presented
         by "Costa, É. D., & Braga, J. P. (2024). The Rachford-Rice equation: application to ternary diagram. Revista Brasileira De Ensino De Física,
         46. https://doi.org/10.1590/1806-9126-rbef-2024-0077".
@@ -186,7 +186,6 @@ class CalculateComps:
             error_list.append(np.sum(light_error) + np.sum(heavy_error))            
                 
             if (light_error < 0.001).all() & (heavy_error < 0.001).all() or iter >= 100:
-                print(iter)                 
                 comp_results[:, 0:8] = calculated_w_light     
                 comp_results[:, 8:16] = calculated_w_heavy     
                 
@@ -198,7 +197,7 @@ class CalculateComps:
                 initial_w_light_guess = initial_w_light_guess + relaxation_factor * (calculated_w_light - initial_w_light_guess)
                 initial_w_heavy_guess = initial_w_heavy_guess + relaxation_factor * (calculated_w_heavy - initial_w_heavy_guess) 
              
-        return comp_results, error_list
+        return comp_results
     
     
     @staticmethod
