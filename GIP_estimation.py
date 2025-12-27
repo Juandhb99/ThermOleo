@@ -10,9 +10,9 @@ from Unifac import Unifac
 from UnifacDortmund import UnifacDortmund
 from PhaseCalculation import CalculateComps as cc
 
-tie_lines = pl.read_excel(r"C:\Juan Hoyos\Code\ThermOleo\ExperimentalData\data\No 47exp\refined_lle_data_v5.xlsx", engine="calamine")
-group_contribution = pl.read_excel(r"C:\Juan Hoyos\Code\ThermOleo\ExperimentalData\data\group_contribution.xlsx", engine="calamine")
-comps_MW = pl.read_excel(r"C:\Juan Hoyos\Code\ThermOleo\ExperimentalData\data\comps_MW.xlsx", engine="calamine")
+tie_lines = pl.read_excel(r"C:\Juan\maestria\ThermOleo\ExperimentalData\data\No 47exp\refined_lle_data_v5.xlsx", engine="calamine")
+group_contribution = pl.read_excel(r"C:\Juan\maestria\ThermOleo\ExperimentalData\data\group_contribution.xlsx", engine="calamine")
+comps_MW = pl.read_excel(r"C:\Juan\maestria\ThermOleo\ExperimentalData\data\comps_MW.xlsx", engine="calamine")
 
 tie_lines = tie_lines.with_columns(
         pl.col("Sub Ref").str.slice(0, 1).alias("Sub Ref")
@@ -74,11 +74,11 @@ def GA_correlation(ga_instace, solution, solution_idx):
     
     
     A = solution[0:30]
-    B = solution[30:60]
-    C = solution[60:90]
+    B = np.zeros(30) #solution[30:60] 
+    C = np.zeros(30) #solution[60:90] 
     
     GIP = cc.define_GIP(A, B, C)
-    
+
     results_list = []
     for name, data in group_tie_lines:
         tie_lines_np = data.drop(["Ref", "Sub Ref", "Temperature (K)"]).to_numpy()
@@ -108,10 +108,10 @@ if __name__ == "__main__":
     #res = differential_evolution(func = predict_comps, bounds=bounds, args=(tie_lines_eval_np,))
     #res = dual_annealing(func = predict_comps, bounds=bounds, args=(tie_lines_eval_np,))
     
-    num_generations = 300
-    sol_per_pop = 150
-    num_genes = 90
-    num_paretns_mating = 100 # 70
+    num_generations = 50
+    sol_per_pop = 40
+    num_genes = 30
+    num_paretns_mating = 30  # 70
     ga_instance = pygad.GA(
     num_genes=num_genes,
     sol_per_pop=sol_per_pop,
@@ -119,11 +119,11 @@ if __name__ == "__main__":
     num_generations=num_generations,
     parallel_processing = ["process", 8],
     fitness_func= GA_correlation,
-    gene_space={'low': -2, 'high': 2}  # Bounds for each parameter
+    gene_space={'low': -20000, 'high': 20000}  # Bounds for each parameter
     )
     
     ga_instance.run()
-    filename = "genetic_machine_2_run_2"
+    filename = "genetic_machine_2_unifac"
     ga_instance.save(filename = filename)
     ga_instance.plot_fitness()
     solution, solution_fitness, solution_idx = ga_instance.best_solution(ga_instance.last_generation_fitness)
