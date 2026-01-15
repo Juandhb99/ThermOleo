@@ -7,9 +7,9 @@ from UnifacDortmund import UnifacDortmund
 from PhaseCalculation import CalculateComps as cc
 
 
-tie_lines = pl.read_excel(r"C:\Juan\Maestría\Code\oleosim\ExperimentalData\data\No 47exp\refined_lle_data_v5.xlsx", engine="calamine")
-group_contribution = pl.read_excel(r"C:\Juan\Maestría\Code\oleosim\ExperimentalData\data\group_contribution.xlsx", engine="calamine")
-comps_MW = pl.read_excel(r"C:\Juan\Maestría\Code\oleosim\ExperimentalData\data\comps_MW.xlsx", engine="calamine")
+tie_lines = pl.read_excel(r"C:\Juan\maestria\ThermOleo\ExperimentalData\data\No 47exp\refined_lle_data_v5.xlsx", engine="calamine")
+group_contribution = pl.read_excel(r"C:\Juan\maestria\ThermOleo\ExperimentalData\data\group_contribution.xlsx", engine="calamine")
+comps_MW = pl.read_excel(r"C:\Juan\maestria\ThermOleo\ExperimentalData\data\comps_MW.xlsx", engine="calamine")
 
 tie_lines = tie_lines.with_columns(
         pl.col("Sub Ref").str.slice(0, 1).alias("Sub Ref")
@@ -24,9 +24,9 @@ tie_lines_validate = tie_lines_validate.drop(["index"])
 group_contribution = group_contribution.drop(["MAG/DAG Profile?", "Additional FAME Profile?", "Acid mix Profile?", "Type Alcohol"])
 comps_MW = comps_MW.drop(["Type Alcohol"])
 tie_lines = tie_lines.drop(["index"])
-group_tie_lines = tie_lines.group_by(["Ref", "Sub Ref", "Temperature (K)"], maintain_order=True)     
+group_tie_lines = tie_lines_validate.group_by(["Ref", "Sub Ref", "Temperature (K)"], maintain_order=True)     
 
-tie_lines_eval = tie_lines.select(['FAME/FAEE_L', 'GLYCEROL_L', 'ALCOHOL_L', 'OIL_L', 'DAG_L', 'MAG_L', 'ACID_L', 'WATER_L', 'FAME/FAEE_H', 'GLYCEROL_H', 'ALCOHOL_H', 'OIL_H', 'DAG_H', 'MAG_H', 'ACID_H', 'WATER_H'])
+tie_lines_eval = tie_lines_validate.select(['FAME/FAEE_L', 'GLYCEROL_L', 'ALCOHOL_L', 'OIL_L', 'DAG_L', 'MAG_L', 'ACID_L', 'WATER_L', 'FAME/FAEE_H', 'GLYCEROL_H', 'ALCOHOL_H', 'OIL_H', 'DAG_H', 'MAG_H', 'ACID_H', 'WATER_H'])
 tie_lines_eval_np = tie_lines_eval.to_numpy()    
 thermo_model = UnifacDortmund
 
@@ -85,9 +85,13 @@ def predict_comps_eval(params):
     #B = params[0:30]
     #C = params[30:60]
     
+    # A = params[0:30]
+    # B = params[30:60]
+    # C = params[60:90]
+    
     A = params[0:30]
-    B = params[30:60]
-    C = params[60:90]
+    B = np.zeros(30) #solution[30:60] 
+    C = np.zeros(30) #solution[60:90] 
     
     GIP = cc.define_GIP(A, B, C)
     
@@ -95,28 +99,27 @@ def predict_comps_eval(params):
     error_list = []
     analysis_dict = {}
     for name, data in group_tie_lines:
-        print(name)
         tie_lines_np = data.drop(["Ref", "Sub Ref", "Temperature (K)"]).to_numpy()
         v = group_contribution.filter((pl.col("Ref") == name[0]) & (pl.col("Sub Ref") == name[1])).drop(["Ref", "Sub Ref"]).to_numpy()
         experiment_MW = comps_MW.filter((pl.col("Ref") == name[0]) & (pl.col("Sub Ref") == name[1])).drop(["Ref", "Sub Ref"]).to_numpy()
         experiment_MW.reshape(8) 
-        comp_results, error_list = cc.calculate_comps(tie_lines_np[:,0:8], v, experiment_MW, name[2], thermo_model, GIP, initial_guess=tie_lines_np[:,8:25])  
-        analysis_dict.update({name:error_list})
+        comp_results = cc.calculate_comps(tie_lines_np[:,0:8], v, experiment_MW, name[2], thermo_model, GIP, initial_guess=tie_lines_np[:,8:25])  
+        #analysis_dict.update({name:error_list})
         results_list.append(comp_results) #tie_lines_np[:,8:25]
     
     results_total = np.vstack(results_list) 
     mask = tie_lines_eval_np == 0
     results_total[mask] = 0 
     
-    #pl.DataFrame(results_total, schema=['FAME/FAEE_L', 'GLYCEROL_L', 'ALCOHOL_L', 'OIL_L', 'DAG_L', 'MAG_L', 'ACID_L', 'WATER_L', 'FAME/FAEE_H', 'GLYCEROL_H', 'ALCOHOL_H', 'OIL_H', 'DAG_H', 'MAG_H', 'ACID_H', 'WATER_H']).write_excel("results_total_data_damping.xlsx") 
-    #pl.DataFrame(tie_lines_eval_np, schema=['FAME/FAEE_L', 'GLYCEROL_L', 'ALCOHOL_L', 'OIL_L', 'DAG_L', 'MAG_L', 'ACID_L', 'WATER_L', 'FAME/FAEE_H', 'GLYCEROL_H', 'ALCOHOL_H', 'OIL_H', 'DAG_H', 'MAG_H', 'ACID_H', 'WATER_H']).write_excel("total_data_damping.xlsx") 
-    with open('analysis_dict.pkl', 'wb') as f:
-        pickle.dump(analysis_dict, f)
+    pl.DataFrame(results_total, schema=['FAME/FAEE_L', 'GLYCEROL_L', 'ALCOHOL_L', 'OIL_L', 'DAG_L', 'MAG_L', 'ACID_L', 'WATER_L', 'FAME/FAEE_H', 'GLYCEROL_H', 'ALCOHOL_H', 'OIL_H', 'DAG_H', 'MAG_H', 'ACID_H', 'WATER_H']).write_excel("unifac_test_results.xlsx") 
+    pl.DataFrame(tie_lines_eval_np, schema=['FAME/FAEE_L', 'GLYCEROL_L', 'ALCOHOL_L', 'OIL_L', 'DAG_L', 'MAG_L', 'ACID_L', 'WATER_L', 'FAME/FAEE_H', 'GLYCEROL_H', 'ALCOHOL_H', 'OIL_H', 'DAG_H', 'MAG_H', 'ACID_H', 'WATER_H']).write_excel("unifac_test_data.xlsx") 
+    # with open('analysis_dict.pkl', 'wb') as f:
+    #     pickle.dump(analysis_dict, f)
 
     return root_mean_squared_error(tie_lines_eval_np, results_total)
 
 if __name__ == "__main__":
    
-    params = np.loadtxt(r"C:\Juan\Maestría\Code\oleosim\Evaluation\Stochastic_optimization\GA\UDortmundParamsGARun1.out")
+    params = np.loadtxt(r"C:\Juan\maestria\ThermOleo\Evaluation\Stochastic_optimization\GA\UnifacCorrelatedParams.out")
     #params = np.zeros(60)
     print(predict_comps_eval(params))
