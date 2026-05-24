@@ -24,9 +24,9 @@ tie_lines_validate = tie_lines_validate.drop(["index"])
 group_contribution = group_contribution.drop(["MAG/DAG Profile?", "Additional FAME Profile?", "Acid mix Profile?", "Type Alcohol"])
 comps_MW = comps_MW.drop(["Type Alcohol"])
 tie_lines = tie_lines.drop(["index"])
-group_tie_lines = tie_lines_validate.group_by(["Ref", "Sub Ref", "Temperature (K)"], maintain_order=True)     
+group_tie_lines = tie_lines.group_by(["Ref", "Sub Ref", "Temperature (K)"], maintain_order=True)     
 
-tie_lines_eval = tie_lines_validate.select(['FAME/FAEE_L', 'GLYCEROL_L', 'ALCOHOL_L', 'OIL_L', 'DAG_L', 'MAG_L', 'ACID_L', 'WATER_L', 'FAME/FAEE_H', 'GLYCEROL_H', 'ALCOHOL_H', 'OIL_H', 'DAG_H', 'MAG_H', 'ACID_H', 'WATER_H'])
+tie_lines_eval = tie_lines.select(['FAME/FAEE_L', 'GLYCEROL_L', 'ALCOHOL_L', 'OIL_L', 'DAG_L', 'MAG_L', 'ACID_L', 'WATER_L', 'FAME/FAEE_H', 'GLYCEROL_H', 'ALCOHOL_H', 'OIL_H', 'DAG_H', 'MAG_H', 'ACID_H', 'WATER_H'])
 tie_lines_eval_np = tie_lines_eval.to_numpy()    
 thermo_model = UnifacDortmund
 
@@ -96,6 +96,7 @@ def predict_comps_eval(params):
     GIP = cc.define_GIP(A, B, C)
     
     results_list = []
+    gamma_list = []
     error_list = []
     analysis_dict = {}
     for name, data in group_tie_lines:
@@ -103,16 +104,20 @@ def predict_comps_eval(params):
         v = group_contribution.filter((pl.col("Ref") == name[0]) & (pl.col("Sub Ref") == name[1])).drop(["Ref", "Sub Ref"]).to_numpy()
         experiment_MW = comps_MW.filter((pl.col("Ref") == name[0]) & (pl.col("Sub Ref") == name[1])).drop(["Ref", "Sub Ref"]).to_numpy()
         experiment_MW.reshape(8) 
-        comp_results = cc.calculate_comps(tie_lines_np[:,0:8], v, experiment_MW, name[2], thermo_model, GIP, initial_guess=tie_lines_np[:,8:25])  
+        comp_results, gamma_results = cc.calculate_comps(tie_lines_np[:,0:8], v, experiment_MW, name[2], thermo_model, GIP, initial_guess=tie_lines_np[:,8:25])  
         #analysis_dict.update({name:error_list})
         results_list.append(comp_results) #tie_lines_np[:,8:25]
+        gamma_list.append(gamma_results) #tie_lines_np[:,8:25]
     
     results_total = np.vstack(results_list) 
+    gamma_total = np.vstack(gamma_list)
     mask = tie_lines_eval_np == 0
     results_total[mask] = 0 
+    gamma_total[mask] = 0 
     
-    pl.DataFrame(results_total, schema=['FAME/FAEE_L', 'GLYCEROL_L', 'ALCOHOL_L', 'OIL_L', 'DAG_L', 'MAG_L', 'ACID_L', 'WATER_L', 'FAME/FAEE_H', 'GLYCEROL_H', 'ALCOHOL_H', 'OIL_H', 'DAG_H', 'MAG_H', 'ACID_H', 'WATER_H']).write_excel("unifac_test_results.xlsx") 
-    pl.DataFrame(tie_lines_eval_np, schema=['FAME/FAEE_L', 'GLYCEROL_L', 'ALCOHOL_L', 'OIL_L', 'DAG_L', 'MAG_L', 'ACID_L', 'WATER_L', 'FAME/FAEE_H', 'GLYCEROL_H', 'ALCOHOL_H', 'OIL_H', 'DAG_H', 'MAG_H', 'ACID_H', 'WATER_H']).write_excel("unifac_test_data.xlsx") 
+    pl.DataFrame(gamma_total, schema=['G_FAME/FAEE_L', 'G_GLYCEROL_L', 'G_ALCOHOL_L', 'G_OIL_L', 'G_DAG_L', 'G_MAG_L', 'G_ACID_L', 'G_WATER_L', 'G_FAME/FAEE_H', 'G_GLYCEROL_H', 'G_ALCOHOL_H', 'G_OIL_H', 'G_DAG_H', 'G_MAG_H', 'G_ACID_H', 'G_WATER_H']).write_excel("gamma_results.xlsx") 
+    #pl.DataFrame(results_total, schema=['FAME/FAEE_L', 'GLYCEROL_L', 'ALCOHOL_L', 'OIL_L', 'DAG_L', 'MAG_L', 'ACID_L', 'WATER_L', 'FAME/FAEE_H', 'GLYCEROL_H', 'ALCOHOL_H', 'OIL_H', 'DAG_H', 'MAG_H', 'ACID_H', 'WATER_H']).write_excel("unifac_test_results.xlsx") 
+    #pl.DataFrame(tie_lines_eval_np, schema=['FAME/FAEE_L', 'GLYCEROL_L', 'ALCOHOL_L', 'OIL_L', 'DAG_L', 'MAG_L', 'ACID_L', 'WATER_L', 'FAME/FAEE_H', 'GLYCEROL_H', 'ALCOHOL_H', 'OIL_H', 'DAG_H', 'MAG_H', 'ACID_H', 'WATER_H']).write_excel("unifac_test_data.xlsx") 
     # with open('analysis_dict.pkl', 'wb') as f:
     #     pickle.dump(analysis_dict, f)
 

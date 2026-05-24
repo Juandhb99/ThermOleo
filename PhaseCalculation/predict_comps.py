@@ -121,6 +121,7 @@ class CalculateComps:
             np.ndarray: Component mass fraction in each phase. This will be two matrices of time 
         """       
         comp_results = np.zeros((data.shape[0], 16)) 
+        gamma_results = np.zeros((data.shape[0], 16)) 
         phase_distribution = thermo_model(GIP, v, data_MW, temperature)
         mask_light = data == 0
         mask_heavy = data == 0 
@@ -187,7 +188,10 @@ class CalculateComps:
                 
             if (light_error < 0.001).all() & (heavy_error < 0.001).all() or iter >= 100:
                 comp_results[:, 0:8] = calculated_w_light     
-                comp_results[:, 8:16] = calculated_w_heavy     
+                comp_results[:, 8:16] = calculated_w_heavy    
+                gamma_results[:, 0:8] = gamma_light     
+                gamma_results[:, 8:16] = gamma_heavy    
+                 
                 
                 break
             
@@ -197,7 +201,7 @@ class CalculateComps:
                 initial_w_light_guess = initial_w_light_guess + relaxation_factor * (calculated_w_light - initial_w_light_guess)
                 initial_w_heavy_guess = initial_w_heavy_guess + relaxation_factor * (calculated_w_heavy - initial_w_heavy_guess) 
              
-        return comp_results
+        return comp_results, gamma_results
     
     
     @staticmethod
